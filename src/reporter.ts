@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { getFeatureFlags, getFeatureFlagsByMaintainerTeams } from './service'
-import { runRulesEngine } from './rules'
+import { runRulesEngine } from './rules/rules'
 import { getReportByType } from './reports'
 
 export async function run(): Promise<void> {

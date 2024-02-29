@@ -27136,7 +27136,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const service_1 = __nccwpck_require__(2115);
-const rules_1 = __nccwpck_require__(1058);
+const rules_1 = __nccwpck_require__(9727);
 const reports_1 = __nccwpck_require__(4649);
 async function run() {
     try {
@@ -27370,7 +27370,7 @@ exports.slackReport = {
 
 /***/ }),
 
-/***/ 1058:
+/***/ 9727:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -27421,37 +27421,21 @@ const dontHaveCodeReferences = (flag) => {
     core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
     return flag.codeReferences?.items?.length === 0;
 };
-const isEnabledByDefaultAndNoOffVariationTargets = (flag) => {
+const doesHaveOnlyDefaultVariation = (flag) => {
     const environment = core.getInput('environment-key');
     const currentEnvironment = flag.environments[environment]?._summary;
-    if (!currentEnvironment)
+    if (!currentEnvironment?.variations)
         return false;
-    const variations = currentEnvironment.variations;
-    const defaults = flag.defaults;
-    core.info(`Rule - isEnabledByDefaultAndNoOffVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`);
-    const isEnabledByDefault = variations[defaults.onVariation]?.isFallthrough;
-    if (isEnabledByDefault) {
-        const offVariation = variations[defaults.offVariation];
-        return (!offVariation?.targets &&
-            !offVariation?.rules &&
-            !offVariation?.contextTargets);
-    }
-    return false;
-};
-const isDisabledByDefaultAndNoOnVariationTargets = (flag) => {
-    const environment = core.getInput('environment-key');
-    const currentEnvironment = flag.environments[environment]?._summary;
-    if (!currentEnvironment)
-        return false;
-    const variations = currentEnvironment.variations;
-    const defaults = flag.defaults;
-    core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`);
-    const isDisabledByDefault = variations[defaults.offVariation]?.isFallthrough;
-    if (isDisabledByDefault) {
-        const onVariation = variations[defaults.onVariation];
-        return (!onVariation?.targets &&
-            !onVariation?.rules &&
-            !onVariation?.contextTargets);
+    const variations = Object.values(currentEnvironment.variations);
+    // Filtering non-empty variations
+    const targetedVariations = variations.filter(variation => {
+        return (variation?.targets || variation?.rules || variation?.contextTargets);
+    });
+    core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(targetedVariations)}`);
+    // If a single variation is targeted check if it's enabled by default
+    if (targetedVariations.length === 1) {
+        const [targetedVariation] = targetedVariations;
+        return targetedVariation.isFallthrough;
     }
     return false;
 };
@@ -27460,8 +27444,7 @@ const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
     if (isNotNewlyCreated(featureFlag) &&
         isNotMultivariate(featureFlag) &&
         isNotPermanent(featureFlag)) {
-        return (isDisabledByDefaultAndNoOnVariationTargets(featureFlag) ||
-            isEnabledByDefaultAndNoOffVariationTargets(featureFlag) ||
+        return (doesHaveOnlyDefaultVariation(featureFlag) ||
             dontHaveCodeReferences(featureFlag));
     }
     return false;
