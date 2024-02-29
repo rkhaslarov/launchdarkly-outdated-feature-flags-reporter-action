@@ -27161,6 +27161,7 @@ async function run() {
             : await (0, service_1.getFeatureFlags)({
                 ...requestParams
             });
+        core.info(`Feature Flags: ${JSON.stringify(featureFlags)}`);
         if (featureFlags.length === 0) {
             return;
         }
@@ -27459,7 +27460,7 @@ const getFeatureFlags = async ({ accessToken, projectKey, environment, filters =
 };
 exports.getFeatureFlags = getFeatureFlags;
 const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams }) => {
-    const response = await Promise.all(maintainerTeams.map(async (team) => (0, exports.getFeatureFlags)({
+    const response = await Promise.all(maintainerTeams.map(async (team) => await (0, exports.getFeatureFlags)({
         accessToken,
         projectKey,
         environment,
