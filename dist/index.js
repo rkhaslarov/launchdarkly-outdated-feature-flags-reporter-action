@@ -27428,10 +27428,10 @@ const isEnabledByDefaultAndNoOffVariationTargets = (flag) => {
         return false;
     const variations = currentEnvironment.variations;
     const defaults = flag.defaults;
+    core.info(`Rule - isEnabledByDefaultAndNoOffVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`);
     const isEnabledByDefault = variations[defaults.onVariation]?.isFallthrough;
     if (isEnabledByDefault) {
         const offVariation = variations[defaults.offVariation];
-        core.info(`Rule - isEnabledByDefaultAndNoOffVariationTargets: ${flag.key} ${JSON.stringify(offVariation)}`);
         return (!offVariation?.targets &&
             !offVariation?.rules &&
             !offVariation?.contextTargets);
@@ -27445,10 +27445,10 @@ const isDisabledByDefaultAndNoOnVariationTargets = (flag) => {
         return false;
     const variations = currentEnvironment.variations;
     const defaults = flag.defaults;
+    core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`);
     const isDisabledByDefault = variations[defaults.offVariation]?.isFallthrough;
     if (isDisabledByDefault) {
         const onVariation = variations[defaults.onVariation];
-        core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(onVariation)}`);
         return (!onVariation?.targets &&
             !onVariation?.rules &&
             !onVariation?.contextTargets);
