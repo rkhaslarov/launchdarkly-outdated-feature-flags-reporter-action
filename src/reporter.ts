@@ -30,9 +30,8 @@ export async function run(): Promise<void> {
                   ...requestParams
               })
 
-        core.info(`Feature Flags: ${JSON.stringify(featureFlags)}`)
-
         if (featureFlags.length === 0) {
+            core.info(`Feature Flags list is empty`)
             return
         }
 
@@ -43,7 +42,7 @@ export async function run(): Promise<void> {
         }
 
         core.info(
-            `Feature Flags ready for review: ${JSON.stringify(filteredFeatureFlags)}`
+            `Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`
         )
 
         const reporter = getReportByType(reportType)

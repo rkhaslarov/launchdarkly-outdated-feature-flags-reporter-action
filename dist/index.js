@@ -27161,15 +27161,15 @@ async function run() {
             : await (0, service_1.getFeatureFlags)({
                 ...requestParams
             });
-        core.info(`Feature Flags: ${JSON.stringify(featureFlags)}`);
         if (featureFlags.length === 0) {
+            core.info(`Feature Flags list is empty`);
             return;
         }
         const filteredFeatureFlags = (0, rules_1.runRulesEngine)(featureFlags);
         if (filteredFeatureFlags.length === 0) {
             return;
         }
-        core.info(`Feature Flags ready for review: ${JSON.stringify(filteredFeatureFlags)}`);
+        core.info(`Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`);
         const reporter = (0, reports_1.getReportByType)(reportType);
         if (reporter) {
             await reporter?.run(filteredFeatureFlags, {
@@ -27372,25 +27372,53 @@ exports.slackReport = {
 /***/ }),
 
 /***/ 1058:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runRulesEngine = void 0;
 const date_fns_1 = __nccwpck_require__(3314);
+const core = __importStar(__nccwpck_require__(2186));
 const isNotPermanent = (flag) => {
+    core.info(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
     return flag.temporary;
 };
 const isNotMultivariate = (flag) => {
+    core.info(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
     return flag.kind === 'boolean';
 };
 const isNotNewlyCreated = (flag, maxDays = 30) => {
     const createdDate = new Date(flag.creationDate);
     const diffInDays = (0, date_fns_1.differenceInCalendarDays)(createdDate, Date.now());
+    core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`);
     return diffInDays >= maxDays;
 };
 const dontHaveCodeReferences = (flag) => {
+    core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences}`);
     return flag.codeReferences.items.length === 0;
 };
 const isEnabledByDefaultAndNoOffVariationTargets = (flag, environment) => {
@@ -27402,6 +27430,7 @@ const isEnabledByDefaultAndNoOffVariationTargets = (flag, environment) => {
     const isEnabledByDefault = variations[defaults.onVariation]?.isFallthrough;
     if (isEnabledByDefault) {
         const offVariation = variations[defaults.offVariation];
+        core.info(`Rule - isEnabledByDefaultAndNoOffVariationTargets: ${flag.key} ${JSON.stringify(offVariation)}`);
         return (!offVariation?.targets &&
             !offVariation?.rules &&
             !offVariation?.contextTargets);
@@ -27417,6 +27446,7 @@ const isDisabledByDefaultAndNoOnVariationTargets = (flag, environment) => {
     const isDisabledByDefault = variations[defaults.offVariation]?.isFallthrough;
     if (isDisabledByDefault) {
         const onVariation = variations[defaults.onVariation];
+        core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(onVariation)}`);
         return (!onVariation?.targets &&
             !onVariation?.rules &&
             !onVariation?.contextTargets);
