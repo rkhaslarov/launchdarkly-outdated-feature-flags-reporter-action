@@ -27454,12 +27454,13 @@ const isDisabledByDefaultAndNoOnVariationTargets = (flag, environment) => {
     return false;
 };
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
+    core.info(`########### ${featureFlag.key} ########### `);
     if (isNotNewlyCreated(featureFlag) &&
         isNotMultivariate(featureFlag) &&
         isNotPermanent(featureFlag)) {
-        return (dontHaveCodeReferences(featureFlag) ||
-            isDisabledByDefaultAndNoOnVariationTargets(featureFlag) ||
-            isEnabledByDefaultAndNoOffVariationTargets(featureFlag));
+        return (isDisabledByDefaultAndNoOnVariationTargets(featureFlag) ||
+            isEnabledByDefaultAndNoOffVariationTargets(featureFlag) ||
+            dontHaveCodeReferences(featureFlag));
     }
     return false;
 });
