@@ -26,10 +26,10 @@ const isNotNewlyCreated: Rule = (flag: FeatureFlag, maxDays = 30): boolean => {
 
 const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
     core.info(
-        `Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences}`
+        `Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`
     )
 
-    return flag.codeReferences.items.length === 0
+    return flag.codeReferences?.items?.length === 0
 }
 
 const isEnabledByDefaultAndNoOffVariationTargets: Rule = (
