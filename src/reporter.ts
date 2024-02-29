@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { getFeatureFlagsByMaintainerTeams } from './service'
+import { getFeatureFlags, getFeatureFlagsByMaintainerTeams } from './service'
 import { runRulesEngine } from './rules'
 import { getReportByType } from './reports'
 
@@ -15,12 +15,20 @@ export async function run(): Promise<void> {
 
         core.info(`Starting request...`)
 
-        const featureFlags = await getFeatureFlagsByMaintainerTeams({
+        const requestParams = {
             accessToken,
             projectKey,
-            environment,
-            maintainerTeams
-        })
+            environment
+        }
+
+        const featureFlags = maintainerTeams?.length
+            ? await getFeatureFlagsByMaintainerTeams({
+                  maintainerTeams,
+                  ...requestParams
+              })
+            : await getFeatureFlags({
+                  ...requestParams
+              })
 
         if (featureFlags.length === 0) {
             return

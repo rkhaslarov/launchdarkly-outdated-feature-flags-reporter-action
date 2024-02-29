@@ -33,7 +33,7 @@ inputs:
 # Define your outputs here.
 outputs:
   feature-flags:
-    description: 'Outdate Feature Flags Entities from Launch Darkly'
+    description: 'Outdated Feature Flags Entities from Launch Darkly'
 
 runs:
   using: node20

@@ -7,12 +7,12 @@ export const getFeatureFlags = async ({
     accessToken,
     projectKey,
     environment,
-    filters
+    filters = ''
 }: {
     accessToken: string
     projectKey: string
     environment: string
-    filters: string
+    filters?: string
 }): Promise<FeatureFlag[]> => {
     const { data } = await axios.get<{ items: FeatureFlag[] }>(
         `${url}/${projectKey}?env=${environment}&archived=false&filter=${filters}&expand=codeReferences`,
@@ -30,7 +30,7 @@ export const getFeatureFlagsByMaintainerTeams = async ({
     accessToken,
     projectKey,
     environment,
-    maintainerTeams,
+    maintainerTeams
 }: {
     accessToken: string
     projectKey: string
