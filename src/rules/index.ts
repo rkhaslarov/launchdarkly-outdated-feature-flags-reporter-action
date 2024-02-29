@@ -15,6 +15,13 @@ const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
     return flag.kind === 'boolean'
 }
 
+const isNotExcludedByTags: Rule = (flag: FeatureFlag): boolean => {
+    core.info(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`)
+    const excludedTags: string[] = core.getInput('excluded-tags')?.split(',')
+
+    return flag.tags.every(tag => !excludedTags.includes(tag))
+}
+
 const isNotNewlyCreated: Rule = (flag: FeatureFlag): boolean => {
     const threshold = Number(core.getInput('threshold'))
     const createdDate = new Date(flag.creationDate)
@@ -37,7 +44,8 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     const environment: string = core.getInput('environment-key')
     const currentEnvironment = flag.environments[environment]?._summary
 
-    if (!currentEnvironment?.variations) return false
+    if (!currentEnvironment?.variations || currentEnvironment.prerequisites > 0)
+        return false
 
     const variations = Object.values(currentEnvironment.variations)
 
@@ -49,7 +57,7 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     })
 
     core.info(
-        `Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(targetedVariations)}`
+        `Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`
     )
 
     // If a single variation is targeted check if it's enabled by default
@@ -69,7 +77,8 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
         if (
             isNotNewlyCreated(featureFlag) &&
             isNotMultivariate(featureFlag) &&
-            isNotPermanent(featureFlag)
+            isNotPermanent(featureFlag) &&
+            isNotExcludedByTags(featureFlag)
         ) {
             return (
                 doesHaveOnlyDefaultVariation(featureFlag) ||

@@ -27136,7 +27136,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const service_1 = __nccwpck_require__(2115);
-const rules_1 = __nccwpck_require__(9727);
+const rules_1 = __nccwpck_require__(341);
 const reports_1 = __nccwpck_require__(4649);
 async function run() {
     try {
@@ -27370,7 +27370,7 @@ exports.slackReport = {
 
 /***/ }),
 
-/***/ 9727:
+/***/ 341:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -27410,6 +27410,11 @@ const isNotMultivariate = (flag) => {
     core.info(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
     return flag.kind === 'boolean';
 };
+const isNotExcludedByTags = (flag) => {
+    core.info(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`);
+    const excludedTags = core.getInput('excluded-tags')?.split(',');
+    return flag.tags.every(tag => !excludedTags.includes(tag));
+};
 const isNotNewlyCreated = (flag) => {
     const threshold = Number(core.getInput('threshold'));
     const createdDate = new Date(flag.creationDate);
@@ -27424,14 +27429,14 @@ const dontHaveCodeReferences = (flag) => {
 const doesHaveOnlyDefaultVariation = (flag) => {
     const environment = core.getInput('environment-key');
     const currentEnvironment = flag.environments[environment]?._summary;
-    if (!currentEnvironment?.variations)
+    if (!currentEnvironment?.variations || currentEnvironment.prerequisites > 0)
         return false;
     const variations = Object.values(currentEnvironment.variations);
     // Filtering non-empty variations
     const targetedVariations = variations.filter(variation => {
         return (variation?.targets || variation?.rules || variation?.contextTargets);
     });
-    core.info(`Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(targetedVariations)}`);
+    core.info(`Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`);
     // If a single variation is targeted check if it's enabled by default
     if (targetedVariations.length === 1) {
         const [targetedVariation] = targetedVariations;
@@ -27443,7 +27448,8 @@ const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
     core.info(`########### ${featureFlag.key} ########### `);
     if (isNotNewlyCreated(featureFlag) &&
         isNotMultivariate(featureFlag) &&
-        isNotPermanent(featureFlag)) {
+        isNotPermanent(featureFlag) &&
+        isNotExcludedByTags(featureFlag)) {
         return (doesHaveOnlyDefaultVariation(featureFlag) ||
             dontHaveCodeReferences(featureFlag));
     }
