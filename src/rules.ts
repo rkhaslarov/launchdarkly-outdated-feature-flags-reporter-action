@@ -94,15 +94,17 @@ const isDisabledByDefaultAndNoOnVariationTargets: Rule = (
 
 export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
     featureFlags.filter(featureFlag => {
+        core.info(`########### ${featureFlag.key} ########### `)
+
         if (
             isNotNewlyCreated(featureFlag) &&
             isNotMultivariate(featureFlag) &&
             isNotPermanent(featureFlag)
         ) {
             return (
-                dontHaveCodeReferences(featureFlag) ||
                 isDisabledByDefaultAndNoOnVariationTargets(featureFlag) ||
-                isEnabledByDefaultAndNoOffVariationTargets(featureFlag)
+                isEnabledByDefaultAndNoOffVariationTargets(featureFlag) ||
+                dontHaveCodeReferences(featureFlag)
             )
         }
 
