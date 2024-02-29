@@ -28,6 +28,10 @@ jobs:
           node-version-file: .node-version
           cache: npm
 
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+
       - name: Check Format
         id: npm-format-check
         run: npm run format:check
