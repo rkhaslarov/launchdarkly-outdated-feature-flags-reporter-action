@@ -18,10 +18,17 @@ inputs:
   environment-key:
     description: 'Launch Darkly Project Environment'
     required: true
+  maintainer-teams:
+    description: 'Maintainer teams'
+    required: true
   report-type:
     description: 'Report Type (Slack or Custom)'
     required: false
     default: 'custom'
+  slack-webhook:
+    description: 'If Report Type is Slack, specify the Slack Webhook URL'
+    required: false
+
 
 # Define your outputs here.
 outputs:
