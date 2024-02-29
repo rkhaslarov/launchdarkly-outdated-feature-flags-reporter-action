@@ -17,7 +17,7 @@ const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
 
 const isNotNewlyCreated: Rule = (flag: FeatureFlag, maxDays = 30): boolean => {
     const createdDate = new Date(flag.creationDate)
-    const diffInDays = differenceInCalendarDays(createdDate, Date.now())
+    const diffInDays = differenceInCalendarDays(Date.now(), createdDate)
 
     core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`)
 

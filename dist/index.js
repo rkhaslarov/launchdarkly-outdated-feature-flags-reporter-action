@@ -27413,7 +27413,7 @@ const isNotMultivariate = (flag) => {
 };
 const isNotNewlyCreated = (flag, maxDays = 30) => {
     const createdDate = new Date(flag.creationDate);
-    const diffInDays = (0, date_fns_1.differenceInCalendarDays)(createdDate, Date.now());
+    const diffInDays = (0, date_fns_1.differenceInCalendarDays)(Date.now(), createdDate);
     core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`);
     return diffInDays >= maxDays;
 };
