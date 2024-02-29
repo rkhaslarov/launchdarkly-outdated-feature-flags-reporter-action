@@ -39,7 +39,7 @@ export const getFeatureFlagsByMaintainerTeams = async ({
 }): Promise<FeatureFlag[]> => {
     const response = await Promise.all(
         maintainerTeams.map(async team =>
-            getFeatureFlags({
+            await getFeatureFlags({
                 accessToken,
                 projectKey,
                 environment,

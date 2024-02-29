@@ -24,7 +24,7 @@ inputs:
   report-type:
     description: 'Report Type (Slack or Custom)'
     required: false
-    default: 'custom'
+    default: 'default'
   slack-webhook:
     description: 'If Report Type is Slack, specify the Slack Webhook URL'
     required: false
