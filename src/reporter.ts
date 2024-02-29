@@ -30,6 +30,8 @@ export async function run(): Promise<void> {
                   ...requestParams
               })
 
+        core.info(`Feature Flags: ${JSON.stringify(featureFlags)}`)
+
         if (featureFlags.length === 0) {
             return
         }

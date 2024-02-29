@@ -38,13 +38,14 @@ export const getFeatureFlagsByMaintainerTeams = async ({
     maintainerTeams: string[]
 }): Promise<FeatureFlag[]> => {
     const response = await Promise.all(
-        maintainerTeams.map(async team =>
-            getFeatureFlags({
-                accessToken,
-                projectKey,
-                environment,
-                filters: `maintainerTeamKey:${team}`
-            })
+        maintainerTeams.map(
+            async team =>
+                await getFeatureFlags({
+                    accessToken,
+                    projectKey,
+                    environment,
+                    filters: `maintainerTeamKey:${team}`
+                })
         )
     )
 
