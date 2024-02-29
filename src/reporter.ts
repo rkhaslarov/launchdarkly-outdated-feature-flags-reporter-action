@@ -48,10 +48,7 @@ export async function run(): Promise<void> {
         const reporter = getReportByType(reportType)
 
         if (reporter) {
-            await reporter?.run(filteredFeatureFlags, {
-                projectKey,
-                environment
-            })
+            await reporter?.run(filteredFeatureFlags)
         }
 
         core.setOutput('feature-flags', filteredFeatureFlags)
