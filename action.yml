@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'LaunchDarkly Outdated Feature Flags Reporter'
+description: 'The action provide the feature flags that might be ready for removal'
+author: 'Rufat Khaslarov'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
@@ -9,15 +9,24 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  access-token:
+    description: 'Launch Darkly Access Token with Read permissions at least'
     required: true
-    default: '1000'
+  project-key:
+    description: 'Launch Darkly Project Key'
+    required: true
+  environment-key:
+    description: 'Launch Darkly Project Environment'
+    required: true
+  report-type:
+    description: 'Report Type (Slack or Custom)'
+    required: false
+    default: 'custom'
 
 # Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  feature-flags:
+    description: 'Outdate Feature Flags Entities from Launch Darkly'
 
 runs:
   using: node20
