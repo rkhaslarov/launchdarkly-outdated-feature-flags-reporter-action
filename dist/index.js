@@ -27418,8 +27418,8 @@ const isNotNewlyCreated = (flag, maxDays = 30) => {
     return diffInDays >= maxDays;
 };
 const dontHaveCodeReferences = (flag) => {
-    core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences}`);
-    return flag.codeReferences.items.length === 0;
+    core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
+    return flag.codeReferences?.items?.length === 0;
 };
 const isEnabledByDefaultAndNoOffVariationTargets = (flag, environment) => {
     const currentEnvironment = flag.environments[environment]?._summary;
