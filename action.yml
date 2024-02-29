@@ -21,6 +21,9 @@ inputs:
   maintainer-teams:
     description: 'Maintainer teams with assigned feature flags in Launch Darkly'
     required: false
+  excluded-tags:
+    description: 'Tags that should be filtered out in the analysis'
+    required: false
   threshold:
     description: 'Indicates that this variable pertains to a threshold related to feature flags being considered outdated'
     required: false

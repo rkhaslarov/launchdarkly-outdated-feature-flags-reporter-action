@@ -7,6 +7,7 @@ export type Variation = {
 
 export type Environment = {
     _summary: {
+        prerequisites: number
         variations: Record<string, Variation>
     }
 }
