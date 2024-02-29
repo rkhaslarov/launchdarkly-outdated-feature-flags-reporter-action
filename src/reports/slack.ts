@@ -100,9 +100,11 @@ export function formatSlackMessage(
 }
 
 export const slackReport = {
-    async run(featureFlags: FeatureFlag[], options: Record<string, string>) {
+    async run(featureFlags: FeatureFlag[]) {
         const slackWebhook: string = core.getInput('slack-webhook')
-        const url = `https://app.launchdarkly.com/${options.projectKey}/${options.environment}/features/`
+        const projectKey: string = core.getInput('project-key')
+        const environment: string = core.getInput('environment-key')
+        const url = `https://app.launchdarkly.com/${projectKey}/${environment}/features/`
         const groupedFeatureFlags =
             groupFeatureFlagsByMaintainerTeam(featureFlags)
 

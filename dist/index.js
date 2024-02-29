@@ -27172,10 +27172,7 @@ async function run() {
         core.info(`Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`);
         const reporter = (0, reports_1.getReportByType)(reportType);
         if (reporter) {
-            await reporter?.run(filteredFeatureFlags, {
-                projectKey,
-                environment
-            });
+            await reporter?.run(filteredFeatureFlags);
         }
         core.setOutput('feature-flags', filteredFeatureFlags);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27224,8 +27221,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.defaultReport = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 exports.defaultReport = {
-    async run(featureFlags, options) {
-        core.info(`Default reporter output: ${JSON.stringify(featureFlags)} and options ${JSON.stringify(options)}`);
+    async run(featureFlags) {
+        core.info(`Default reporter output: ${JSON.stringify(featureFlags)}}`);
     }
 };
 
@@ -27357,9 +27354,11 @@ function formatSlackMessage(blocks, count) {
 }
 exports.formatSlackMessage = formatSlackMessage;
 exports.slackReport = {
-    async run(featureFlags, options) {
+    async run(featureFlags) {
         const slackWebhook = core.getInput('slack-webhook');
-        const url = `https://app.launchdarkly.com/${options.projectKey}/${options.environment}/features/`;
+        const projectKey = core.getInput('project-key');
+        const environment = core.getInput('environment-key');
+        const url = `https://app.launchdarkly.com/${projectKey}/${environment}/features/`;
         const groupedFeatureFlags = groupFeatureFlagsByMaintainerTeam(featureFlags);
         const blocks = formatFeatureFlags(groupedFeatureFlags, { url });
         const message = formatSlackMessage(blocks, featureFlags.length);
@@ -27411,17 +27410,19 @@ const isNotMultivariate = (flag) => {
     core.info(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
     return flag.kind === 'boolean';
 };
-const isNotNewlyCreated = (flag, maxDays = 30) => {
+const isNotNewlyCreated = (flag) => {
+    const threshold = Number(core.getInput('threshold'));
     const createdDate = new Date(flag.creationDate);
     const diffInDays = (0, date_fns_1.differenceInCalendarDays)(Date.now(), createdDate);
     core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`);
-    return diffInDays >= maxDays;
+    return diffInDays >= threshold;
 };
 const dontHaveCodeReferences = (flag) => {
     core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
     return flag.codeReferences?.items?.length === 0;
 };
-const isEnabledByDefaultAndNoOffVariationTargets = (flag, environment) => {
+const isEnabledByDefaultAndNoOffVariationTargets = (flag) => {
+    const environment = core.getInput('environment-key');
     const currentEnvironment = flag.environments[environment]?._summary;
     if (!currentEnvironment)
         return false;
@@ -27437,7 +27438,8 @@ const isEnabledByDefaultAndNoOffVariationTargets = (flag, environment) => {
     }
     return false;
 };
-const isDisabledByDefaultAndNoOnVariationTargets = (flag, environment) => {
+const isDisabledByDefaultAndNoOnVariationTargets = (flag) => {
+    const environment = core.getInput('environment-key');
     const currentEnvironment = flag.environments[environment]?._summary;
     if (!currentEnvironment)
         return false;

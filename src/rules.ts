@@ -15,13 +15,14 @@ const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
     return flag.kind === 'boolean'
 }
 
-const isNotNewlyCreated: Rule = (flag: FeatureFlag, maxDays = 30): boolean => {
+const isNotNewlyCreated: Rule = (flag: FeatureFlag): boolean => {
+    const threshold = Number(core.getInput('threshold'))
     const createdDate = new Date(flag.creationDate)
     const diffInDays = differenceInCalendarDays(Date.now(), createdDate)
 
     core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`)
 
-    return diffInDays >= maxDays
+    return diffInDays >= threshold
 }
 
 const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
@@ -33,9 +34,9 @@ const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
 }
 
 const isEnabledByDefaultAndNoOffVariationTargets: Rule = (
-    flag: FeatureFlag,
-    environment: string
+    flag: FeatureFlag
 ): boolean => {
+    const environment: string = core.getInput('environment-key')
     const currentEnvironment = flag.environments[environment]?._summary
 
     if (!currentEnvironment) return false
@@ -63,9 +64,9 @@ const isEnabledByDefaultAndNoOffVariationTargets: Rule = (
 }
 
 const isDisabledByDefaultAndNoOnVariationTargets: Rule = (
-    flag: FeatureFlag,
-    environment: string
+    flag: FeatureFlag
 ): boolean => {
+    const environment: string = core.getInput('environment-key')
     const currentEnvironment = flag.environments[environment]?._summary
 
     if (!currentEnvironment) return false

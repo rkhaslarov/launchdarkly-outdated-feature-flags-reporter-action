@@ -19,10 +19,14 @@ inputs:
     description: 'Launch Darkly Project Environment'
     required: true
   maintainer-teams:
-    description: 'Maintainer teams'
-    required: true
+    description: 'Maintainer teams with assigned feature flags in Launch Darkly'
+    required: false
+  threshold:
+    description: 'Indicates that this variable pertains to a threshold related to feature flags being considered outdated'
+    required: false
+    default: 30
   report-type:
-    description: 'Report Type (Slack or Custom)'
+    description: 'Report Type (Slack or Default)'
     required: false
     default: 'default'
   slack-webhook:
