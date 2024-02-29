@@ -1,4 +1,4 @@
-import { FeatureFlag } from './types'
+import { FeatureFlag } from '../types'
 import { differenceInCalendarDays } from 'date-fns'
 import * as core from '@actions/core'
 
@@ -33,61 +33,30 @@ const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
     return flag.codeReferences?.items?.length === 0
 }
 
-const isEnabledByDefaultAndNoOffVariationTargets: Rule = (
-    flag: FeatureFlag
-): boolean => {
+const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     const environment: string = core.getInput('environment-key')
     const currentEnvironment = flag.environments[environment]?._summary
 
-    if (!currentEnvironment) return false
+    if (!currentEnvironment?.variations) return false
 
-    const variations = currentEnvironment.variations
-    const defaults = flag.defaults
+    const variations = Object.values(currentEnvironment.variations)
+
+    // Filtering non-empty variations
+    const targetedVariations = variations.filter(variation => {
+        return (
+            variation?.targets || variation?.rules || variation?.contextTargets
+        )
+    })
 
     core.info(
-        `Rule - isEnabledByDefaultAndNoOffVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`
+        `Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify(targetedVariations)}`
     )
 
-    const isEnabledByDefault = variations[defaults.onVariation]?.isFallthrough
+    // If a single variation is targeted check if it's enabled by default
+    if (targetedVariations.length === 1) {
+        const [targetedVariation] = targetedVariations
 
-    if (isEnabledByDefault) {
-        const offVariation = variations[defaults.offVariation]
-
-        return (
-            !offVariation?.targets &&
-            !offVariation?.rules &&
-            !offVariation?.contextTargets
-        )
-    }
-
-    return false
-}
-
-const isDisabledByDefaultAndNoOnVariationTargets: Rule = (
-    flag: FeatureFlag
-): boolean => {
-    const environment: string = core.getInput('environment-key')
-    const currentEnvironment = flag.environments[environment]?._summary
-
-    if (!currentEnvironment) return false
-
-    const variations = currentEnvironment.variations
-    const defaults = flag.defaults
-
-    core.info(
-        `Rule - isDisabledByDefaultAndNoOnVariationTargets: ${flag.key} ${JSON.stringify({ variations, defaults })}`
-    )
-
-    const isDisabledByDefault = variations[defaults.offVariation]?.isFallthrough
-
-    if (isDisabledByDefault) {
-        const onVariation = variations[defaults.onVariation]
-
-        return (
-            !onVariation?.targets &&
-            !onVariation?.rules &&
-            !onVariation?.contextTargets
-        )
+        return targetedVariation.isFallthrough
     }
 
     return false
@@ -103,8 +72,7 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
             isNotPermanent(featureFlag)
         ) {
             return (
-                isDisabledByDefaultAndNoOnVariationTargets(featureFlag) ||
-                isEnabledByDefaultAndNoOffVariationTargets(featureFlag) ||
+                doesHaveOnlyDefaultVariation(featureFlag) ||
                 dontHaveCodeReferences(featureFlag)
             )
         }
