@@ -6,17 +6,17 @@ import * as core from '@actions/core'
 type Rule = (flag: FeatureFlag, ...args: any[]) => boolean
 
 const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
-    core.info(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
+    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
     return flag.temporary
 }
 
 const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
-    core.info(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
+    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
     return flag.kind === 'boolean'
 }
 
 const isNotExcludedByTags: Rule = (flag: FeatureFlag): boolean => {
-    core.info(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`)
+    core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`)
     const excludedTags: string[] = core.getInput('excluded-tags')?.split(',')
 
     return flag.tags.every(tag => !excludedTags.includes(tag))
@@ -27,13 +27,13 @@ const isNotNewlyCreated: Rule = (flag: FeatureFlag): boolean => {
     const createdDate = new Date(flag.creationDate)
     const diffInDays = differenceInCalendarDays(Date.now(), createdDate)
 
-    core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`)
+    core.debug(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`)
 
     return diffInDays >= threshold
 }
 
 const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
-    core.info(
+    core.debug(
         `Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`
     )
 
@@ -56,7 +56,7 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
         )
     })
 
-    core.info(
+    core.debug(
         `Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`
     )
 
@@ -72,7 +72,7 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
 
 export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
     featureFlags.filter(featureFlag => {
-        core.info(`########### ${featureFlag.key} ########### `)
+        core.debug(`########### ${featureFlag.key} ########### `)
 
         if (
             isNotNewlyCreated(featureFlag) &&

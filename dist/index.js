@@ -27300,7 +27300,7 @@ function formatFeatureFlag(featureFlag, options) {
     const distance = (0, date_fns_1.formatDistance)(createdDate, new Date(), {
         addSuffix: true
     });
-    return `\n📌 <${options.url}|${featureFlag.key}> | ${distance}`;
+    return `\n📌 <${options.url}${featureFlag.key}|${featureFlag.key}> | ${distance}`;
 }
 function formatMaintainerTeam(maintainerTeam) {
     return `\n👤 *${maintainerTeam}*: `;
@@ -27343,7 +27343,7 @@ function formatSlackMessage(blocks, count) {
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: "Handle them with care during review, and consider archiving if they aren't in active use by other consumers."
+                    text: "Handle them with care during review, and consider archiving if they aren't in active use by other consumers. Otherwise, use *excluded-tags* option for manage flag manually."
                 }
             },
             {
@@ -27403,15 +27403,15 @@ exports.runRulesEngine = void 0;
 const date_fns_1 = __nccwpck_require__(3314);
 const core = __importStar(__nccwpck_require__(2186));
 const isNotPermanent = (flag) => {
-    core.info(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
+    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
     return flag.temporary;
 };
 const isNotMultivariate = (flag) => {
-    core.info(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
+    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
     return flag.kind === 'boolean';
 };
 const isNotExcludedByTags = (flag) => {
-    core.info(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`);
+    core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`);
     const excludedTags = core.getInput('excluded-tags')?.split(',');
     return flag.tags.every(tag => !excludedTags.includes(tag));
 };
@@ -27419,11 +27419,11 @@ const isNotNewlyCreated = (flag) => {
     const threshold = Number(core.getInput('threshold'));
     const createdDate = new Date(flag.creationDate);
     const diffInDays = (0, date_fns_1.differenceInCalendarDays)(Date.now(), createdDate);
-    core.info(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`);
+    core.debug(`Rule - isNotNewlyCreated: ${flag.key} ${diffInDays}`);
     return diffInDays >= threshold;
 };
 const dontHaveCodeReferences = (flag) => {
-    core.info(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
+    core.debug(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
     return flag.codeReferences?.items?.length === 0;
 };
 const doesHaveOnlyDefaultVariation = (flag) => {
@@ -27436,7 +27436,7 @@ const doesHaveOnlyDefaultVariation = (flag) => {
     const targetedVariations = variations.filter(variation => {
         return (variation?.targets || variation?.rules || variation?.contextTargets);
     });
-    core.info(`Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`);
+    core.debug(`Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`);
     // If a single variation is targeted check if it's enabled by default
     if (targetedVariations.length === 1) {
         const [targetedVariation] = targetedVariations;
@@ -27445,7 +27445,7 @@ const doesHaveOnlyDefaultVariation = (flag) => {
     return false;
 };
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
-    core.info(`########### ${featureFlag.key} ########### `);
+    core.debug(`########### ${featureFlag.key} ########### `);
     if (isNotNewlyCreated(featureFlag) &&
         isNotMultivariate(featureFlag) &&
         isNotPermanent(featureFlag) &&

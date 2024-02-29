@@ -35,7 +35,7 @@ function formatFeatureFlag(
         addSuffix: true
     })
 
-    return `\n📌 <${options.url}|${featureFlag.key}> | ${distance}`
+    return `\n📌 <${options.url}${featureFlag.key}|${featureFlag.key}> | ${distance}`
 }
 
 function formatMaintainerTeam(maintainerTeam: string): string {
@@ -89,7 +89,7 @@ export function formatSlackMessage(
                 type: 'section',
                 text: {
                     type: 'mrkdwn',
-                    text: "Handle them with care during review, and consider archiving if they aren't in active use by other consumers."
+                    text: "Handle them with care during review, and consider archiving if they aren't in active use by other consumers. Otherwise, use *excluded-tags* option for manage flag manually."
                 }
             },
             {
@@ -104,12 +104,11 @@ export const slackReport = {
         const slackWebhook: string = core.getInput('slack-webhook')
         const projectKey: string = core.getInput('project-key')
         const environment: string = core.getInput('environment-key')
+
         const url = `https://app.launchdarkly.com/${projectKey}/${environment}/features/`
         const groupedFeatureFlags =
             groupFeatureFlagsByMaintainerTeam(featureFlags)
-
         const blocks = formatFeatureFlags(groupedFeatureFlags, { url })
-
         const message = formatSlackMessage(blocks, featureFlags.length)
 
         core.info(
