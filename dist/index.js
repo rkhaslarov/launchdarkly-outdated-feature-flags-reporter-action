@@ -27446,14 +27446,14 @@ const doesHaveOnlyDefaultVariation = (flag) => {
 };
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
     core.debug(`########### ${featureFlag.key} ########### `);
-    if (isNotNewlyCreated(featureFlag) &&
-        isNotMultivariate(featureFlag) &&
-        isNotPermanent(featureFlag) &&
-        isNotExcludedByTags(featureFlag)) {
-        return (doesHaveOnlyDefaultVariation(featureFlag) ||
-            dontHaveCodeReferences(featureFlag));
+    if (!isNotNewlyCreated(featureFlag) ||
+        !isNotExcludedByTags(featureFlag)) {
+        return false;
     }
-    return false;
+    return (dontHaveCodeReferences(featureFlag) ||
+        (isNotMultivariate(featureFlag) &&
+            isNotPermanent(featureFlag) &&
+            doesHaveOnlyDefaultVariation(featureFlag)));
 });
 exports.runRulesEngine = runRulesEngine;
 
