@@ -75,16 +75,16 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
         core.debug(`########### ${featureFlag.key} ########### `)
 
         if (
-            isNotNewlyCreated(featureFlag) &&
-            isNotMultivariate(featureFlag) &&
-            isNotPermanent(featureFlag) &&
-            isNotExcludedByTags(featureFlag)
+            !isNotNewlyCreated(featureFlag) ||
+            !isNotExcludedByTags(featureFlag)
         ) {
-            return (
-                doesHaveOnlyDefaultVariation(featureFlag) ||
-                dontHaveCodeReferences(featureFlag)
-            )
+            return false
         }
 
-        return false
+        return (
+            dontHaveCodeReferences(featureFlag) ||
+            (isNotMultivariate(featureFlag) &&
+                isNotPermanent(featureFlag) &&
+                doesHaveOnlyDefaultVariation(featureFlag))
+        )
     })
