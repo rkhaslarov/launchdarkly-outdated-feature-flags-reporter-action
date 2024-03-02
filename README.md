@@ -7,9 +7,9 @@
 
 ## Overview
 
-This GitHub Action automates the process of identifying feature flags that 
-are ready for removal based on specified criteria. 
-It generates a report of such feature flags, which can be sent 
+This GitHub Action automates the process of identifying feature flags that
+are ready for removal based on specified criteria.
+It generates a report of such feature flags, which can be sent
 to designated channels such as Slack.
 
 ## Usage
@@ -20,7 +20,8 @@ To use this action, you need to specify the following parameters:
 - `project-key`: The project key for accessing the LaunchDarkly project.
 - `environment-key`: The environment key for the LaunchDarkly environment.
 - `maintainer-teams`: The teams responsible for maintaining the feature flags.
-- `threshold`: The threshold in days for considering a feature flag as ready for removal.
+- `threshold`: The threshold in days for considering a feature flag as ready
+   for removal.
 - `report-type`: The type of report to generate (e.g., 'slack' or 'default').
 - `excluded-tags`: Any tags to be excluded from consideration for removal.
 - `slack-webhook`: The Slack webhook for sending the report.
@@ -66,4 +67,3 @@ jobs:
   are properly configured in your repository's secrets settings.
 - This action helps streamline the process of identifying and managing outdated
   feature flags in your LaunchDarkly environment.
-  
