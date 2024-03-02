@@ -1,5 +1,3 @@
-# Create a GitHub Action Using TypeScript
-
 [![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
 [![Check dist/](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml)
@@ -9,7 +7,8 @@
 
 ## Overview
 
-This GitHub Action automates the process of identifying feature flags that are ready for removal based on specified criteria. It generates a report of such feature flags, which can be sent to designated channels such as Slack.
+This GitHub Action automates the process of identifying feature flags that are ready for removal based on specified criteria. 
+It generates a report of such feature flags, which can be sent to designated channels such as Slack.
 
 ## Usage
 
@@ -59,5 +58,7 @@ jobs:
 ```
 
 ## Notes
-- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV, SLACK_WEBHOOK) are properly configured in your repository's secrets settings.
-- This action helps streamline the process of identifying and managing outdated feature flags in your LaunchDarkly environment.
+- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV, SLACK_WEBHOOK) are properly
+  configured in your repository's secrets settings.
+- This action helps streamline the process of identifying and managing outdated
+  feature flags in your LaunchDarkly environment.
