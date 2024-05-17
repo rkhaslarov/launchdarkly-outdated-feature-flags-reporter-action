@@ -27442,6 +27442,9 @@ const doesHaveOnlyDefaultVariation = (flag) => {
         const [targetedVariation] = targetedVariations;
         return targetedVariation.isFallthrough;
     }
+    if (targetedVariations.length === 0) {
+        return true;
+    }
     return false;
 };
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
