@@ -67,6 +67,10 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
         return targetedVariation.isFallthrough
     }
 
+    if (targetedVariations.length === 0) {
+        return true
+    }
+
     return false
 }
 
