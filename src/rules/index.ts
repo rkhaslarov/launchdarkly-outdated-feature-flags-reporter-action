@@ -5,10 +5,10 @@ import * as core from '@actions/core'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rule = (flag: FeatureFlag, ...args: any[]) => boolean
 
-const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
-    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
-    return flag.temporary
-}
+// const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
+//     core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
+//     return flag.temporary
+// }
 
 // const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
 //     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
@@ -83,8 +83,7 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
 
         if (
             !isNotNewlyCreated(featureFlag) ||
-            !isNotExcludedByTags(featureFlag) ||
-            !isNotPermanent(featureFlag)
+            !isNotExcludedByTags(featureFlag)
         ) {
             return false
         }
