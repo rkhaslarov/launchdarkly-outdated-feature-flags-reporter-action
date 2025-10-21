@@ -20,6 +20,11 @@ export type MaintainerTeam = {
 
 export type FeatureFlag = {
     _maintainerTeam: MaintainerTeam
+    _links: {
+        self: {
+            href: string
+        }
+    }
     creationDate: string
     defaults: {
         offVariation: number
