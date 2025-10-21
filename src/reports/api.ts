@@ -52,17 +52,16 @@ export const apiReport = {
 
         const groupedFlags = groupByMaintainerTeam(featureFlags)
         const payload = buildPayload(groupedFlags)
+        const response = JSON.stringify(payload)
 
-        core.info(
-            `Sending ${payload.length} team(s) data to API: ${JSON.stringify(payload)}`
-        )
+        core.info(`Sending ${payload.length} team(s) data to API: ${response}`)
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             ...(apiToken && { Authorization: `Bearer ${apiToken}` })
         }
 
-        await axios.post(apiUrl, payload, { headers })
+        await axios.post(apiUrl, response, { headers })
 
         core.info('Successfully sent data to API')
     }

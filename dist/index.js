@@ -27255,12 +27255,13 @@ exports.apiReport = {
         }
         const groupedFlags = groupByMaintainerTeam(featureFlags);
         const payload = buildPayload(groupedFlags);
-        core.info(`Sending ${payload.length} team(s) data to API: ${JSON.stringify(payload)}`);
+        const response = JSON.stringify(payload);
+        core.info(`Sending ${payload.length} team(s) data to API: ${response}`);
         const headers = {
             'Content-Type': 'application/json',
             ...(apiToken && { Authorization: `Bearer ${apiToken}` })
         };
-        await axios_1.default.post(apiUrl, payload, { headers });
+        await axios_1.default.post(apiUrl, response, { headers });
         core.info('Successfully sent data to API');
     }
 };
