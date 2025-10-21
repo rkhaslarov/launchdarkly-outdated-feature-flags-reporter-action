@@ -27189,6 +27189,85 @@ exports.run = run;
 
 /***/ }),
 
+/***/ 5598:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.apiReport = void 0;
+const axios_1 = __importDefault(__nccwpck_require__(8757));
+const core = __importStar(__nccwpck_require__(2186));
+const groupByMaintainerTeam = (featureFlags) => {
+    const grouped = featureFlags.reduce((acc, flag) => {
+        const teamKey = flag._maintainerTeam.key;
+        if (!acc[teamKey]) {
+            acc[teamKey] = {
+                maintainerTeam: {
+                    key: flag._maintainerTeam.key,
+                    name: flag._maintainerTeam.name
+                },
+                flags: []
+            };
+        }
+        acc[teamKey].flags.push(flag);
+        return acc;
+    }, {});
+    return Object.values(grouped);
+};
+const buildPayload = (groupedData) => groupedData.map(({ maintainerTeam, flags }) => ({
+    maintainerTeam,
+    featureFlags: flags.map(flag => flag.key)
+}));
+exports.apiReport = {
+    async run(featureFlags) {
+        const apiUrl = core.getInput('api-url');
+        const apiToken = core.getInput('api-token');
+        if (!apiUrl) {
+            core.warning('api-url input is not provided, skipping API report');
+            return;
+        }
+        const groupedFlags = groupByMaintainerTeam(featureFlags);
+        const payload = buildPayload(groupedFlags);
+        core.info(`Sending ${payload.length} team(s) data to API: ${JSON.stringify(payload)}`);
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(apiToken && { Authorization: `Bearer ${apiToken}` })
+        };
+        await axios_1.default.post(apiUrl, payload, { headers });
+        core.info('Successfully sent data to API');
+    }
+};
+
+
+/***/ }),
+
 /***/ 6954:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -27237,9 +27316,11 @@ exports.defaultReport = {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getReportByType = void 0;
 const slack_1 = __nccwpck_require__(9885);
+const api_1 = __nccwpck_require__(5598);
 const default_1 = __nccwpck_require__(6954);
 const REPORTS = {
     slack: slack_1.slackReport,
+    api: api_1.apiReport,
     default: default_1.defaultReport
 };
 const getReportByType = (type) => REPORTS[type] ?? REPORTS.default;
@@ -27406,10 +27487,10 @@ const isNotPermanent = (flag) => {
     core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
     return flag.temporary;
 };
-const isNotMultivariate = (flag) => {
-    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
-    return flag.kind === 'boolean';
-};
+// const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
+//     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
+//     return flag.kind === 'boolean'
+// }
 const isNotExcludedByTags = (flag) => {
     core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`);
     const excludedTags = core.getInput('excluded-tags')?.split(',');
@@ -27434,13 +27515,16 @@ const doesHaveOnlyDefaultVariation = (flag) => {
     const variations = Object.values(currentEnvironment.variations);
     // Filtering non-empty variations
     const targetedVariations = variations.filter(variation => {
-        return (variation?.targets || variation?.rules || variation?.contextTargets);
+        return (variation?.targets ||
+            variation?.rules ||
+            variation?.contextTargets ||
+            variation?.nullRules);
     });
     core.debug(`Rule - doesHaveOnlyDefaultVariation: ${flag.key} ${JSON.stringify(targetedVariations)}`);
     // If a single variation is targeted check if it's enabled by default
     if (targetedVariations.length === 1) {
         const [targetedVariation] = targetedVariations;
-        return targetedVariation.isFallthrough;
+        return Boolean(targetedVariation.isFallthrough);
     }
     if (targetedVariations.length === 0) {
         return true;
@@ -27450,13 +27534,12 @@ const doesHaveOnlyDefaultVariation = (flag) => {
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
     core.debug(`########### ${featureFlag.key} ########### `);
     if (!isNotNewlyCreated(featureFlag) ||
-        !isNotExcludedByTags(featureFlag)) {
+        !isNotExcludedByTags(featureFlag) ||
+        !isNotPermanent(featureFlag)) {
         return false;
     }
     return (dontHaveCodeReferences(featureFlag) ||
-        (isNotMultivariate(featureFlag) &&
-            isNotPermanent(featureFlag) &&
-            doesHaveOnlyDefaultVariation(featureFlag)));
+        doesHaveOnlyDefaultVariation(featureFlag));
 });
 exports.runRulesEngine = runRulesEngine;
 
@@ -27474,14 +27557,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getFeatureFlagsByMaintainerTeams = exports.getFeatureFlags = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
-const url = 'https://app.launchdarkly.com/api/v2/flags';
-const getFeatureFlags = async ({ accessToken, projectKey, environment, filters = '' }) => {
-    const { data } = await axios_1.default.get(`${url}/${projectKey}?env=${environment}&archived=false&filter=${filters}&expand=codeReferences`, {
+const apiUrl = 'https://app.launchdarkly.com/api/v2/flags';
+const baseUrl = 'https://app.launchdarkly.com';
+const makeRequest = async (url, accessToken, params) => {
+    const { data } = await axios_1.default.get(url, {
         headers: {
             Authorization: accessToken
-        }
+        },
+        params
     });
-    return data?.items ?? [];
+    return data;
+};
+const makePaginatedRequest = async (url, accessToken, params) => {
+    const flags = [];
+    let nextUrl = url;
+    while (nextUrl) {
+        const response = await makeRequest(nextUrl, accessToken, params);
+        flags.push(...(response.items ?? []));
+        nextUrl = response._links?.next?.href
+            ? `${baseUrl}${response._links.next.href}`
+            : undefined;
+        // Clear params after first request since pagination URLs include them
+        params = undefined;
+    }
+    return flags;
+};
+const getFeatureFlags = async ({ accessToken, projectKey, environment, filters = '' }) => {
+    const params = {
+        limit: '100',
+        expand: 'evaluation,codeReferences',
+        env: environment,
+        archived: 'false'
+    };
+    if (filters) {
+        params.filter = filters;
+    }
+    return await makePaginatedRequest(`${apiUrl}/${projectKey}`, accessToken, params);
 };
 exports.getFeatureFlags = getFeatureFlags;
 const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams }) => {

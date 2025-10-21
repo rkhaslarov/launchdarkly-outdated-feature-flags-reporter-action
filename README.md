@@ -10,7 +10,7 @@
 This GitHub Action automates the process of identifying feature flags that
 are ready for removal based on specified criteria.
 It generates a report of such feature flags, which can be sent
-to designated channels such as Slack.
+to designated channels such as Slack or a custom API endpoint.
 
 ## Usage
 
@@ -22,9 +22,11 @@ To use this action, you need to specify the following parameters:
 - `maintainer-teams`: The teams responsible for maintaining the feature flags.
 - `threshold`: The threshold in days for considering a feature flag as ready
    for removal.
-- `report-type`: The type of report to generate (e.g., 'slack' or 'default').
+- `report-type`: The type of report to generate (e.g., 'slack', 'api', or 'default').
 - `excluded-tags`: Any tags to be excluded from consideration for removal.
-- `slack-webhook`: The Slack webhook for sending the report.
+- `slack-webhook`: The Slack webhook for sending the report (required when report-type is 'slack').
+- `api-url`: The API endpoint URL for sending the report (required when report-type is 'api').
+- `api-token`: The API authentication token (optional, used when report-type is 'api').
 
 ### Trigger
 
@@ -34,7 +36,9 @@ This action can be triggered on a schedule or manually.
 - **Manual:** You can also trigger the action manually through
   GitHub's workflow dispatch feature.
 
-## Example Workflow
+## Example Workflows
+
+### Slack Report
 
 ```yaml
 name: Feature Flags Ready For Removal
@@ -61,9 +65,62 @@ jobs:
           slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
 ```
 
+### API Report
+
+```yaml
+name: Feature Flags Ready For Removal
+on:
+  schedule:
+    - cron: "00 11 * * 5"
+  workflow_dispatch:
+
+jobs:
+  send-feature-flags-report:
+    name: Feature Flags
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Send Report'
+        uses: rkhaslarov/launchdarkly-outdated-feature-flags-reporter-action@v1.0.0
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          project-key: ${{ secrets.PROJECT_KEY }}
+          environment-key: ${{ secrets.LD_ENV }}
+          maintainer-teams: 'team'
+          threshold: 30
+          report-type: 'api'
+          excluded-tags: 'MANUAL_REVIEW'
+          api-url: ${{ secrets.API_URL }}
+          api-token: ${{ secrets.API_TOKEN }}
+```
+
+## API Report Format
+
+When using the `api` report type, the action will send a POST request to the specified API endpoint with the following payload format:
+
+```json
+[
+  {
+    "maintainerTeam": {
+      "key": "team-key-1",
+      "name": "Team Name 1"
+    },
+    "featureFlags": ["flag-key-1", "flag-key-2", "flag-key-3"]
+  },
+  {
+    "maintainerTeam": {
+      "key": "team-key-2",
+      "name": "Team Name 2"
+    },
+    "featureFlags": ["flag-key-4", "flag-key-5"]
+  }
+]
+```
+
+If an `api-token` is provided, it will be sent as a Bearer token in the Authorization header.
+
 ## Notes
 
-- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV, SLACK_WEBHOOK)
+- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV, SLACK_WEBHOOK, API_URL, API_TOKEN)
   are properly configured in your repository's secrets settings.
 - This action helps streamline the process of identifying and managing outdated
   feature flags in your LaunchDarkly environment.

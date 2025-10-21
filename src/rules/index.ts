@@ -10,10 +10,10 @@ const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
     return flag.temporary
 }
 
-const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
-    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
-    return flag.kind === 'boolean'
-}
+// const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
+//     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
+//     return flag.kind === 'boolean'
+// }
 
 const isNotExcludedByTags: Rule = (flag: FeatureFlag): boolean => {
     core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`)
@@ -52,7 +52,10 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     // Filtering non-empty variations
     const targetedVariations = variations.filter(variation => {
         return (
-            variation?.targets || variation?.rules || variation?.contextTargets
+            variation?.targets ||
+            variation?.rules ||
+            variation?.contextTargets ||
+            variation?.nullRules
         )
     })
 
@@ -64,7 +67,7 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     if (targetedVariations.length === 1) {
         const [targetedVariation] = targetedVariations
 
-        return targetedVariation.isFallthrough
+        return Boolean(targetedVariation.isFallthrough)
     }
 
     if (targetedVariations.length === 0) {
@@ -80,15 +83,14 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
 
         if (
             !isNotNewlyCreated(featureFlag) ||
-            !isNotExcludedByTags(featureFlag)
+            !isNotExcludedByTags(featureFlag) ||
+            !isNotPermanent(featureFlag)
         ) {
             return false
         }
 
         return (
             dontHaveCodeReferences(featureFlag) ||
-            (isNotMultivariate(featureFlag) &&
-                isNotPermanent(featureFlag) &&
-                doesHaveOnlyDefaultVariation(featureFlag))
+            doesHaveOnlyDefaultVariation(featureFlag)
         )
     })
