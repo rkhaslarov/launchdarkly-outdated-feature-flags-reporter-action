@@ -27483,10 +27483,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runRulesEngine = void 0;
 const date_fns_1 = __nccwpck_require__(3314);
 const core = __importStar(__nccwpck_require__(2186));
-const isNotPermanent = (flag) => {
-    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
-    return flag.temporary;
-};
+// const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
+//     core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
+//     return flag.temporary
+// }
 // const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
 //     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
 //     return flag.kind === 'boolean'
@@ -27534,8 +27534,7 @@ const doesHaveOnlyDefaultVariation = (flag) => {
 const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
     core.debug(`########### ${featureFlag.key} ########### `);
     if (!isNotNewlyCreated(featureFlag) ||
-        !isNotExcludedByTags(featureFlag) ||
-        !isNotPermanent(featureFlag)) {
+        !isNotExcludedByTags(featureFlag)) {
         return false;
     }
     return (dontHaveCodeReferences(featureFlag) ||
