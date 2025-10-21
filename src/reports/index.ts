@@ -1,4 +1,5 @@
 import { slackReport } from './slack'
+import { apiReport } from './api'
 import { FeatureFlag } from '../types'
 import { defaultReport } from './default'
 
@@ -8,6 +9,7 @@ type Reporter = {
 
 const REPORTS: Record<string, Reporter> = {
     slack: slackReport,
+    api: apiReport,
     default: defaultReport
 }
 

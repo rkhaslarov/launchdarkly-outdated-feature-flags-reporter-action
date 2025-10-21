@@ -3,6 +3,7 @@ export type Variation = {
     targets: number
     rules: number
     contextTargets: number
+    nullRules: number
 }
 
 export type Environment = {
@@ -12,11 +13,13 @@ export type Environment = {
     }
 }
 
+export type MaintainerTeam = {
+    key: string
+    name: string
+}
+
 export type FeatureFlag = {
-    _maintainerTeam: {
-        key: string
-        name: string
-    }
+    _maintainerTeam: MaintainerTeam
     creationDate: string
     defaults: {
         offVariation: number
@@ -31,5 +34,14 @@ export type FeatureFlag = {
     environments: Record<string, Environment>
     codeReferences: {
         items: { sourceLink: string }[]
+    }
+}
+
+export type Response = {
+    items: FeatureFlag[]
+    _links?: {
+        next?: {
+            href?: string
+        }
     }
 }
