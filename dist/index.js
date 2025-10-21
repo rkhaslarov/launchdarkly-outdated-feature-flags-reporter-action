@@ -27243,7 +27243,11 @@ const groupByMaintainerTeam = (featureFlags) => {
 };
 const buildPayload = (groupedData) => groupedData.map(({ maintainerTeam, flags }) => ({
     maintainerTeam,
-    featureFlags: flags.map(flag => flag.key)
+    featureFlags: flags.map(flag => ({
+        key: flag.key,
+        creationDate: flag.creationDate ?? '',
+        links: flag?._links ?? { self: { href: '' } }
+    }))
 }));
 exports.apiReport = {
     async run(featureFlags) {

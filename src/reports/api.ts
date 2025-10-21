@@ -4,7 +4,11 @@ import { FeatureFlag, MaintainerTeam } from '../types'
 
 type Payload = {
     maintainerTeam: MaintainerTeam
-    featureFlags: string[]
+    featureFlags: {
+        key: string
+        creationDate: string
+        links: { self: { href: string } }
+    }[]
 }
 
 type GroupedData = {
@@ -37,7 +41,11 @@ const groupByMaintainerTeam = (featureFlags: FeatureFlag[]): GroupedData[] => {
 const buildPayload = (groupedData: GroupedData[]): Payload[] =>
     groupedData.map(({ maintainerTeam, flags }) => ({
         maintainerTeam,
-        featureFlags: flags.map(flag => flag.key)
+        featureFlags: flags.map(flag => ({
+            key: flag.key,
+            creationDate: flag.creationDate ?? '',
+            links: flag?._links ?? { self: { href: '' } }
+        }))
     }))
 
 export const apiReport = {
