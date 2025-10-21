@@ -5,17 +5,35 @@ import * as core from '@actions/core'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rule = (flag: FeatureFlag, ...args: any[]) => boolean
 
-// const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
-//     core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
-//     return flag.temporary
-// }
+const isRuleEnabled = (ruleName: string): boolean => {
+    const enabledRulesInput = core.getInput('enabled-rules')
+    const enabledRules = enabledRulesInput.split(',').map(rule => rule.trim())
+    return enabledRules.includes(ruleName)
+}
 
-// const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
-//     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
-//     return flag.kind === 'boolean'
-// }
+const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('not-permanent')) {
+        return true
+    }
+
+    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
+    return flag.temporary
+}
+
+const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('not-multivariate')) {
+        return true
+    }
+
+    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
+    return flag.kind === 'boolean'
+}
 
 const isNotExcludedByTags: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('not-excluded-by-tags')) {
+        return true
+    }
+
     core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`)
     const excludedTags: string[] = core.getInput('excluded-tags')?.split(',')
 
@@ -23,6 +41,10 @@ const isNotExcludedByTags: Rule = (flag: FeatureFlag): boolean => {
 }
 
 const isNotNewlyCreated: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('not-newly-created')) {
+        return true
+    }
+
     const threshold = Number(core.getInput('threshold'))
     const createdDate = new Date(flag.creationDate)
     const diffInDays = differenceInCalendarDays(Date.now(), createdDate)
@@ -33,6 +55,10 @@ const isNotNewlyCreated: Rule = (flag: FeatureFlag): boolean => {
 }
 
 const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('no-code-references')) {
+        return false
+    }
+
     core.debug(
         `Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`
     )
@@ -41,6 +67,10 @@ const dontHaveCodeReferences: Rule = (flag: FeatureFlag): boolean => {
 }
 
 const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
+    if (!isRuleEnabled('default-variation-only')) {
+        return false
+    }
+
     const environment: string = core.getInput('environment-key')
     const currentEnvironment = flag.environments[environment]?._summary
 
@@ -77,13 +107,20 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
     return false
 }
 
-export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
-    featureFlags.filter(featureFlag => {
+export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] => {
+    const enabledRulesInput = core.getInput('enabled-rules')
+    const enabledRules = enabledRulesInput.split(',').map(rule => rule.trim())
+
+    core.info(`Enabled rules: ${enabledRules.join(', ')}`)
+
+    return featureFlags.filter(featureFlag => {
         core.debug(`########### ${featureFlag.key} ########### `)
 
         if (
             !isNotNewlyCreated(featureFlag) ||
-            !isNotExcludedByTags(featureFlag)
+            !isNotExcludedByTags(featureFlag) ||
+            !isNotPermanent(featureFlag) ||
+            !isNotMultivariate(featureFlag)
         ) {
             return false
         }
@@ -93,3 +130,4 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] =>
             doesHaveOnlyDefaultVariation(featureFlag)
         )
     })
+}

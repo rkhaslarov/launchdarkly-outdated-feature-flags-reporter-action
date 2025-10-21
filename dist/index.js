@@ -27483,20 +27483,37 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runRulesEngine = void 0;
 const date_fns_1 = __nccwpck_require__(3314);
 const core = __importStar(__nccwpck_require__(2186));
-// const isNotPermanent: Rule = (flag: FeatureFlag): boolean => {
-//     core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`)
-//     return flag.temporary
-// }
-// const isNotMultivariate: Rule = (flag: FeatureFlag): boolean => {
-//     core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`)
-//     return flag.kind === 'boolean'
-// }
+const isRuleEnabled = (ruleName) => {
+    const enabledRulesInput = core.getInput('enabled-rules');
+    const enabledRules = enabledRulesInput.split(',').map(rule => rule.trim());
+    return enabledRules.includes(ruleName);
+};
+const isNotPermanent = (flag) => {
+    if (!isRuleEnabled('not-permanent')) {
+        return true;
+    }
+    core.debug(`Rule - isNotPermanent: ${flag.key} ${flag.temporary}`);
+    return flag.temporary;
+};
+const isNotMultivariate = (flag) => {
+    if (!isRuleEnabled('not-multivariate')) {
+        return true;
+    }
+    core.debug(`Rule - isNotMultivariate: ${flag.key} ${flag.kind}`);
+    return flag.kind === 'boolean';
+};
 const isNotExcludedByTags = (flag) => {
+    if (!isRuleEnabled('not-excluded-by-tags')) {
+        return true;
+    }
     core.debug(`Rule - isExcludedByTag: ${flag.key} ${flag.tags}`);
     const excludedTags = core.getInput('excluded-tags')?.split(',');
     return flag.tags.every(tag => !excludedTags.includes(tag));
 };
 const isNotNewlyCreated = (flag) => {
+    if (!isRuleEnabled('not-newly-created')) {
+        return true;
+    }
     const threshold = Number(core.getInput('threshold'));
     const createdDate = new Date(flag.creationDate);
     const diffInDays = (0, date_fns_1.differenceInCalendarDays)(Date.now(), createdDate);
@@ -27504,10 +27521,16 @@ const isNotNewlyCreated = (flag) => {
     return diffInDays >= threshold;
 };
 const dontHaveCodeReferences = (flag) => {
+    if (!isRuleEnabled('no-code-references')) {
+        return false;
+    }
     core.debug(`Rule - dontHaveCodeReferences: ${flag.key} ${flag.codeReferences?.items?.length}`);
     return flag.codeReferences?.items?.length === 0;
 };
 const doesHaveOnlyDefaultVariation = (flag) => {
+    if (!isRuleEnabled('default-variation-only')) {
+        return false;
+    }
     const environment = core.getInput('environment-key');
     const currentEnvironment = flag.environments[environment]?._summary;
     if (!currentEnvironment?.variations || currentEnvironment.prerequisites > 0)
@@ -27531,15 +27554,22 @@ const doesHaveOnlyDefaultVariation = (flag) => {
     }
     return false;
 };
-const runRulesEngine = (featureFlags) => featureFlags.filter(featureFlag => {
-    core.debug(`########### ${featureFlag.key} ########### `);
-    if (!isNotNewlyCreated(featureFlag) ||
-        !isNotExcludedByTags(featureFlag)) {
-        return false;
-    }
-    return (dontHaveCodeReferences(featureFlag) ||
-        doesHaveOnlyDefaultVariation(featureFlag));
-});
+const runRulesEngine = (featureFlags) => {
+    const enabledRulesInput = core.getInput('enabled-rules');
+    const enabledRules = enabledRulesInput.split(',').map(rule => rule.trim());
+    core.info(`Enabled rules: ${enabledRules.join(', ')}`);
+    return featureFlags.filter(featureFlag => {
+        core.debug(`########### ${featureFlag.key} ########### `);
+        if (!isNotNewlyCreated(featureFlag) ||
+            !isNotExcludedByTags(featureFlag) ||
+            !isNotPermanent(featureFlag) ||
+            !isNotMultivariate(featureFlag)) {
+            return false;
+        }
+        return (dontHaveCodeReferences(featureFlag) ||
+            doesHaveOnlyDefaultVariation(featureFlag));
+    });
+};
 exports.runRulesEngine = runRulesEngine;
 
 

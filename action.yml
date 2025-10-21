@@ -41,6 +41,10 @@ inputs:
   api-token:
     description: 'If Report Type is API, specify the API authentication token (optional)'
     required: false
+  enabled-rules:
+    description: 'Comma-separated list of rules to enable (not-newly-created, not-excluded-by-tags, not-permanent, not-multivariate, no-code-references, default-variation-only). If not specified, all rules are enabled.'
+    required: false
+    default: 'not-newly-created,not-excluded-by-tags,not-permanent,not-multivariate,no-code-references,default-variation-only'
 
 
 # Define your outputs here.
