@@ -24,6 +24,16 @@ To use this action, you need to specify the following parameters:
    for removal.
 - `report-type`: The type of report to generate (e.g., 'slack', 'api', or 'default').
 - `excluded-tags`: Any tags to be excluded from consideration for removal.
+- `enabled-rules`: Comma-separated list of rules to enable. Available rules:
+  - **Filter Rules** (must pass ALL enabled filter rules):
+    - `not-newly-created`: Filters out flags created within the threshold period
+    - `not-excluded-by-tags`: Filters out flags with excluded tags
+    - `not-permanent`: Filters out permanent flags (only includes temporary flags)
+    - `not-multivariate`: Filters out multivariate flags (only includes boolean flags)
+  - **Detection Rules** (must pass at least ONE enabled detection rule):
+    - `no-code-references`: Flags feature flags with no code references
+    - `default-variation-only`: Flags feature flags with only default variation
+  - Default: All rules enabled
 - `slack-webhook`: The Slack webhook for sending the report (required when report-type is 'slack').
 - `api-url`: The API endpoint URL for sending the report (required when report-type is 'api').
 - `api-token`: The API authentication token (optional, used when report-type is 'api').
@@ -91,6 +101,62 @@ jobs:
           excluded-tags: 'MANUAL_REVIEW'
           api-url: ${{ secrets.API_URL }}
           api-token: ${{ secrets.API_TOKEN }}
+```
+
+### Custom Rules Configuration
+
+You can enable specific rules by providing a comma-separated list:
+
+```yaml
+name: Feature Flags Ready For Removal
+on:
+  schedule:
+    - cron: "00 11 * * 5"
+  workflow_dispatch:
+
+jobs:
+  send-feature-flags-report:
+    name: Feature Flags
+    runs-on: ubuntu-latest
+    steps:
+      # Example 1: Only check for flags with no code references (skip all filters)
+      - name: 'Send Report - Only No Code References'
+        uses: rkhaslarov/launchdarkly-outdated-feature-flags-reporter-action@v1.0.0
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          project-key: ${{ secrets.PROJECT_KEY }}
+          environment-key: ${{ secrets.LD_ENV }}
+          maintainer-teams: 'team'
+          threshold: 30
+          report-type: 'slack'
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
+          enabled-rules: 'no-code-references'
+      
+      # Example 2: Only temporary boolean flags with default variation
+      - name: 'Send Report - Temporary Boolean Flags'
+        uses: rkhaslarov/launchdarkly-outdated-feature-flags-reporter-action@v1.0.0
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          project-key: ${{ secrets.PROJECT_KEY }}
+          environment-key: ${{ secrets.LD_ENV }}
+          maintainer-teams: 'team'
+          threshold: 30
+          report-type: 'slack'
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
+          enabled-rules: 'not-permanent,not-multivariate,default-variation-only'
+      
+      # Example 3: Old flags (30+ days) with no code references, regardless of type
+      - name: 'Send Report - Old Flags No Code'
+        uses: rkhaslarov/launchdarkly-outdated-feature-flags-reporter-action@v1.0.0
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          project-key: ${{ secrets.PROJECT_KEY }}
+          environment-key: ${{ secrets.LD_ENV }}
+          maintainer-teams: 'team'
+          threshold: 30
+          report-type: 'slack'
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
+          enabled-rules: 'not-newly-created,no-code-references'
 ```
 
 ## API Report Format
