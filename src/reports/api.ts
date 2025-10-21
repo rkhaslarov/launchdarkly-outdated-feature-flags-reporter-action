@@ -7,7 +7,7 @@ type Payload = {
     featureFlags: {
         key: string
         creationDate: string
-        links: { self: { href: string } }
+        link: string
     }[]
 }
 
@@ -38,15 +38,19 @@ const groupByMaintainerTeam = (featureFlags: FeatureFlag[]): GroupedData[] => {
     return Object.values(grouped)
 }
 
-const buildPayload = (groupedData: GroupedData[]): Payload[] =>
-    groupedData.map(({ maintainerTeam, flags }) => ({
+const buildPayload = (groupedData: GroupedData[]): Payload[] => {
+    const projectKey: string = core.getInput('project-key')
+    const environment: string = core.getInput('environment-key')
+
+    return groupedData.map(({ maintainerTeam, flags }) => ({
         maintainerTeam,
         featureFlags: flags.map(flag => ({
             key: flag.key,
             creationDate: flag.creationDate ?? '',
-            links: flag?._links ?? { self: { href: '' } }
+            link: `https://app.launchdarkly.com/${projectKey}/${environment}/features/${flag.key}`
         }))
     }))
+}
 
 export const apiReport = {
     async run(featureFlags: FeatureFlag[]) {

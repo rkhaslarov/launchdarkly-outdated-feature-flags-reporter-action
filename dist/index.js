@@ -27241,14 +27241,18 @@ const groupByMaintainerTeam = (featureFlags) => {
     }, {});
     return Object.values(grouped);
 };
-const buildPayload = (groupedData) => groupedData.map(({ maintainerTeam, flags }) => ({
-    maintainerTeam,
-    featureFlags: flags.map(flag => ({
-        key: flag.key,
-        creationDate: flag.creationDate ?? '',
-        links: flag?._links ?? { self: { href: '' } }
-    }))
-}));
+const buildPayload = (groupedData) => {
+    const projectKey = core.getInput('project-key');
+    const environment = core.getInput('environment-key');
+    return groupedData.map(({ maintainerTeam, flags }) => ({
+        maintainerTeam,
+        featureFlags: flags.map(flag => ({
+            key: flag.key,
+            creationDate: flag.creationDate ?? '',
+            link: `https://app.launchdarkly.com/${projectKey}/${environment}/features/${flag.key}`
+        }))
+    }));
+};
 exports.apiReport = {
     async run(featureFlags) {
         const apiUrl = core.getInput('api-url');
