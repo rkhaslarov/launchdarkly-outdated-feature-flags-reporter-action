@@ -2,8 +2,7 @@ import { FeatureFlag } from '../types'
 import { differenceInCalendarDays } from 'date-fns'
 import * as core from '@actions/core'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Rule = (flag: FeatureFlag, ...args: any[]) => boolean
+type Rule = (flag: FeatureFlag) => boolean
 
 const isRuleEnabled = (ruleName: string): boolean => {
     const enabledRulesInput = core.getInput('enabled-rules')
@@ -79,7 +78,7 @@ const doesHaveOnlyDefaultVariation: Rule = (flag: FeatureFlag): boolean => {
 
     const variations = Object.values(currentEnvironment.variations)
 
-    // Filtering non-empty variations
+    // Filtering non-empty variations - check each property exists and has a value
     const targetedVariations = variations.filter(variation => {
         return (
             variation?.targets ||

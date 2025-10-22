@@ -2,8 +2,9 @@ import axios from 'axios'
 import * as core from '@actions/core'
 import { FeatureFlag } from '../types'
 import { formatDistance } from 'date-fns'
+import { toFeatureFlagDto } from '../dto'
 
-export interface BlockMessage {
+type BlockMessage = {
     username: string
     icon_emoji: string
     blocks: object[]
@@ -26,16 +27,15 @@ function groupFeatureFlagsByMaintainerTeam(
     )
 }
 
-function formatFeatureFlag(
-    featureFlag: FeatureFlag,
-    options: { url: string }
-): string {
+function formatFeatureFlag(featureFlag: FeatureFlag): string {
     const createdDate = new Date(featureFlag.creationDate)
     const distance = formatDistance(createdDate, new Date(), {
         addSuffix: true
     })
 
-    return `\n📌 <${options.url}${featureFlag.key}|${featureFlag.key}> | ${distance}`
+    const dto = toFeatureFlagDto(featureFlag)
+
+    return `\n📌 <${dto.link}|${dto.key}> | ${distance}`
 }
 
 function formatMaintainerTeam(maintainerTeam: string): string {
@@ -43,13 +43,12 @@ function formatMaintainerTeam(maintainerTeam: string): string {
 }
 
 export function formatFeatureFlags(
-    groupedFeatureFlags: Record<string, FeatureFlag[]>,
-    options: { url: string }
+    groupedFeatureFlags: Record<string, FeatureFlag[]>
 ): object[] {
     return Object.keys(groupedFeatureFlags).map((maintainerTeam: string) => {
         const text = formatMaintainerTeam(maintainerTeam).concat(
             groupedFeatureFlags[maintainerTeam]
-                .map(featureFlag => formatFeatureFlag(featureFlag, options))
+                .map(featureFlag => formatFeatureFlag(featureFlag))
                 .join('')
         )
 
@@ -102,13 +101,17 @@ export function formatSlackMessage(
 export const slackReport = {
     async run(featureFlags: FeatureFlag[]) {
         const slackWebhook: string = core.getInput('slack-webhook')
-        const projectKey: string = core.getInput('project-key')
-        const environment: string = core.getInput('environment-key')
 
-        const url = `https://app.launchdarkly.com/${projectKey}/${environment}/features/`
+        if (!slackWebhook) {
+            core.error(
+                'slack-webhook input is not provided, skipping Slack report'
+            )
+            return
+        }
+
         const groupedFeatureFlags =
             groupFeatureFlagsByMaintainerTeam(featureFlags)
-        const blocks = formatFeatureFlags(groupedFeatureFlags, { url })
+        const blocks = formatFeatureFlags(groupedFeatureFlags)
         const message = formatSlackMessage(blocks, featureFlags.length)
 
         core.info(

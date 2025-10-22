@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { FeatureFlag, Response } from './types'
 
-const apiUrl = 'https://app.launchdarkly.com/api/v2/flags'
-const baseUrl = 'https://app.launchdarkly.com'
+const BASE_URL = 'https://app.launchdarkly.com'
+const API_URL = `${BASE_URL}/api/v2/flags`
 
 const makeRequest = async (
     url: string,
@@ -31,13 +31,14 @@ const makePaginatedRequest = async (
     while (nextUrl) {
         const response = await makeRequest(nextUrl, accessToken, params)
 
-        flags.push(...(response.items ?? []))
+        if (response.items.length > 0) {
+            flags.push(...response.items)
+        }
 
         nextUrl = response._links?.next?.href
-            ? `${baseUrl}${response._links.next.href}`
+            ? `${BASE_URL}${response._links.next.href}`
             : undefined
 
-        // Clear params after first request since pagination URLs include them
         params = undefined
     }
 
@@ -67,7 +68,7 @@ export const getFeatureFlags = async ({
     }
 
     return await makePaginatedRequest(
-        `${apiUrl}/${projectKey}`,
+        `${API_URL}/${projectKey}`,
         accessToken,
         params
     )

@@ -1,14 +1,11 @@
 import axios from 'axios'
 import * as core from '@actions/core'
 import { FeatureFlag, MaintainerTeam } from '../types'
+import { toFeatureFlagDto, FeatureFlagDto } from '../dto'
 
 type Payload = {
     maintainerTeam: MaintainerTeam
-    featureFlags: {
-        key: string
-        creationDate: string
-        link: string
-    }[]
+    featureFlags: FeatureFlagDto[]
 }
 
 type GroupedData = {
@@ -39,16 +36,9 @@ const groupByMaintainerTeam = (featureFlags: FeatureFlag[]): GroupedData[] => {
 }
 
 const buildPayload = (groupedData: GroupedData[]): Payload[] => {
-    const projectKey: string = core.getInput('project-key')
-    const environment: string = core.getInput('environment-key')
-
     return groupedData.map(({ maintainerTeam, flags }) => ({
         maintainerTeam,
-        featureFlags: flags.map(flag => ({
-            key: flag.key,
-            creationDate: flag.creationDate ?? '',
-            link: `https://app.launchdarkly.com/${projectKey}/${environment}/features/${flag.key}`
-        }))
+        featureFlags: flags.map(flag => toFeatureFlagDto(flag))
     }))
 }
 
