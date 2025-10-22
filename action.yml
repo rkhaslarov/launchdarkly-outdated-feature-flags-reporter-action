@@ -35,7 +35,7 @@ inputs:
       min-age:
         days: 30
       exclude-tags:
-        tags: []
+        tags: ['MANUAL_REVIEW']
       temporary-only: true
       boolean-only: true
       unused: true
