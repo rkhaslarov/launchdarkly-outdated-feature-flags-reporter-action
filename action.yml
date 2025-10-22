@@ -43,11 +43,15 @@ inputs:
   maintainer-teams:
     description: 'Maintainer teams with assigned feature flags in Launch Darkly'
     required: false
+  report-type:
+    description: 'Report type: slack, api, or default'
+    required: false
+    default: 'default'
   webhook-url:
-    description: 'Webhook URL for sending reports. Auto-detects Slack webhooks (hooks.slack.com) or treats as custom API endpoint.'
+    description: 'Webhook URL for sending reports (required for slack and api report types)'
     required: false
   webhook-token:
-    description: 'Authentication token for webhook (optional). Sent as Bearer token in Authorization header for non-Slack webhooks.'
+    description: 'Authentication token for webhook (optional). Sent as Bearer token in Authorization header for api report type.'
     required: false
 
 # Define your outputs here.

@@ -26,8 +26,9 @@ to designated channels such as Slack or a custom API endpoint.
 **Optional:**
 
 - `maintainer-teams`: Comma-separated list of teams responsible for maintaining feature flags
-- `webhook-url`: Webhook URL for sending reports (auto-detects Slack or custom API)
-- `webhook-token`: Authentication token for webhook (sent as Bearer token for non-Slack webhooks)
+- `report-type`: Report type - `slack`, `api`, or `default` (default: `default`)
+- `webhook-url`: Webhook URL for sending reports (required for `slack` and `api` report types)
+- `webhook-token`: Authentication token for webhook (sent as Bearer token for `api` report type)
 
 ### Rules Configuration
 
@@ -90,6 +91,7 @@ jobs:
           access-token: ${{ secrets.ACCESS_TOKEN }}
           project-key: ${{ secrets.PROJECT_KEY }}
           environment-key: ${{ secrets.LD_ENV }}
+          report-type: 'slack'
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
 ```
 
@@ -113,6 +115,7 @@ jobs:
           access-token: ${{ secrets.ACCESS_TOKEN }}
           project-key: ${{ secrets.PROJECT_KEY }}
           environment-key: ${{ secrets.LD_ENV }}
+          report-type: 'api'
           webhook-url: ${{ secrets.API_URL }}
           webhook-token: ${{ secrets.API_TOKEN }}
 ```
@@ -140,6 +143,7 @@ jobs:
           access-token: ${{ secrets.ACCESS_TOKEN }}
           project-key: ${{ secrets.PROJECT_KEY }}
           environment-key: ${{ secrets.LD_ENV }}
+          report-type: 'slack'
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           rules-config: |
             min-age:
@@ -158,6 +162,7 @@ jobs:
           access-token: ${{ secrets.ACCESS_TOKEN }}
           project-key: ${{ secrets.PROJECT_KEY }}
           environment-key: ${{ secrets.LD_ENV }}
+          report-type: 'slack'
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           rules-config: |
             min-age:
@@ -176,6 +181,7 @@ jobs:
           access-token: ${{ secrets.ACCESS_TOKEN }}
           project-key: ${{ secrets.PROJECT_KEY }}
           environment-key: ${{ secrets.LD_ENV }}
+          report-type: 'slack'
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           maintainer-teams: 'team-a,team-b'
           rules-config: |
@@ -231,6 +237,6 @@ If `webhook-token` is provided, it will be sent as a Bearer token in the Authori
 ## Notes
 
 - Ensure that all secrets (e.g., `ACCESS_TOKEN`, `PROJECT_KEY`, `LD_ENV`, `SLACK_WEBHOOK`, `API_URL`, `API_TOKEN`) are properly configured in your repository's secrets settings.
-- The action automatically detects Slack webhooks by checking if the URL contains `hooks.slack.com`. All other URLs are treated as custom API endpoints.
+- Set `report-type` to `slack` for Slack webhooks, `api` for custom API endpoints, or `default` for console output only.
 - Rules configuration uses YAML format for better readability and maintainability.
 - This action helps streamline the process of identifying and managing outdated feature flags in your LaunchDarkly environment.
