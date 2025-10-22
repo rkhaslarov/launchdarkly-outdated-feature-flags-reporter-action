@@ -14,7 +14,7 @@ type RulesConfig = {
     'exclude-tags'?: RuleConfig
     'temporary-only'?: RuleConfig
     'boolean-only'?: RuleConfig
-    'unused'?: RuleConfig
+    unused?: RuleConfig
     'default-only'?: RuleConfig
 }
 
@@ -29,7 +29,10 @@ const parseRulesConfig = (): RulesConfig => {
     }
 }
 
-const isRuleEnabled = (config: RulesConfig, ruleName: keyof RulesConfig): boolean => {
+const isRuleEnabled = (
+    config: RulesConfig,
+    ruleName: keyof RulesConfig
+): boolean => {
     return config[ruleName]?.enabled !== false
 }
 
@@ -51,7 +54,10 @@ const isBooleanOnly = (config: RulesConfig, flag: FeatureFlag): boolean => {
     return flag.kind === 'boolean'
 }
 
-const isNotExcludedByTags = (config: RulesConfig, flag: FeatureFlag): boolean => {
+const isNotExcludedByTags = (
+    config: RulesConfig,
+    flag: FeatureFlag
+): boolean => {
     if (!isRuleEnabled(config, 'exclude-tags')) {
         return true
     }
@@ -148,8 +154,7 @@ export const runRulesEngine = (featureFlags: FeatureFlag[]): FeatureFlag[] => {
 
         // At least one detection rule must pass
         return (
-            isUnused(config, featureFlag) ||
-            isDefaultOnly(config, featureFlag)
+            isUnused(config, featureFlag) || isDefaultOnly(config, featureFlag)
         )
     })
 }

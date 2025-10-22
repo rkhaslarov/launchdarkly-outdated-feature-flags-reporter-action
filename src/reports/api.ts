@@ -48,7 +48,9 @@ export const apiReport = {
         const webhookToken = core.getInput('webhook-token')
 
         if (!webhookUrl) {
-            core.warning('webhook-url input is not provided, skipping API report')
+            core.warning(
+                'webhook-url input is not provided, skipping API report'
+            )
             return
         }
 

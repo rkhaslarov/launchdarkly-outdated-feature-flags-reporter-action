@@ -12,7 +12,7 @@ export type FeatureFlagDto = {
 export const toFeatureFlagDto = (flag: FeatureFlag): FeatureFlagDto => {
     const projectKey = core.getInput('project-key')
     const environment = core.getInput('environment-key')
-    
+
     const createdDate = new Date(flag.creationDate)
     const createdAgo = formatDistance(createdDate, new Date(), {
         addSuffix: true
