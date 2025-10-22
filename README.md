@@ -25,10 +25,14 @@ to designated channels such as Slack or a custom API endpoint.
 
 **Optional:**
 
-- `maintainer-teams`: Comma-separated list of teams responsible for maintaining feature flags
-- `report-type`: Report type - `slack`, `api`, or `default` (default: `default`)
-- `webhook-url`: Webhook URL for sending reports (required for `slack` and `api` report types)
-- `webhook-token`: Authentication token for webhook (sent as Bearer token for `api` report type)
+- `maintainer-teams`: Comma-separated list of teams responsible for
+  maintaining feature flags
+- `report-type`: Report type - `slack`, `api`, or `default`
+  (default: `default`)
+- `webhook-url`: Webhook URL for sending reports (required for `slack` and
+  `api` report types)
+- `webhook-token`: Authentication token for webhook (sent as Bearer token for
+  `api` report type)
 
 ### Rules Configuration
 
@@ -197,7 +201,8 @@ jobs:
 
 ## API Report Format
 
-When using a custom API webhook (non-Slack URL), the action will send a POST request with the following payload format:
+When using a custom API webhook (non-Slack URL), the action will send a POST
+request with the following payload format:
 
 ```json
 [
@@ -232,11 +237,17 @@ When using a custom API webhook (non-Slack URL), the action will send a POST req
 ]
 ```
 
-If `webhook-token` is provided, it will be sent as a Bearer token in the Authorization header.
+If `webhook-token` is provided, it will be sent as a Bearer token in the
+Authorization header.
 
 ## Notes
 
-- Ensure that all secrets (e.g., `ACCESS_TOKEN`, `PROJECT_KEY`, `LD_ENV`, `SLACK_WEBHOOK`, `API_URL`, `API_TOKEN`) are properly configured in your repository's secrets settings.
-- Set `report-type` to `slack` for Slack webhooks, `api` for custom API endpoints, or `default` for console output only.
-- Rules configuration uses YAML format for better readability and maintainability.
-- This action helps streamline the process of identifying and managing outdated feature flags in your LaunchDarkly environment.
+- Ensure that all secrets (e.g., `ACCESS_TOKEN`, `PROJECT_KEY`, `LD_ENV`,
+  `SLACK_WEBHOOK`, `API_URL`, `API_TOKEN`) are properly configured in your
+  repository's secrets settings.
+- Set `report-type` to `slack` for Slack webhooks, `api` for custom API
+  endpoints, or `default` for console output only.
+- Rules configuration uses YAML format for better readability and
+  maintainability.
+- This action helps streamline the process of identifying and managing outdated
+  feature flags in your LaunchDarkly environment.
