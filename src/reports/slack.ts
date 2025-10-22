@@ -1,7 +1,6 @@
 import axios from 'axios'
 import * as core from '@actions/core'
 import { FeatureFlag } from '../types'
-import { formatDistance } from 'date-fns'
 import { toFeatureFlagDto } from '../dto'
 
 type BlockMessage = {
@@ -28,14 +27,9 @@ function groupFeatureFlagsByMaintainerTeam(
 }
 
 function formatFeatureFlag(featureFlag: FeatureFlag): string {
-    const createdDate = new Date(featureFlag.creationDate)
-    const distance = formatDistance(createdDate, new Date(), {
-        addSuffix: true
-    })
-
     const dto = toFeatureFlagDto(featureFlag)
 
-    return `\n📌 <${dto.link}|${dto.key}> | ${distance}`
+    return `\n📌 <${dto.link}|${dto.key}> | ${dto.createdAgo}`
 }
 
 function formatMaintainerTeam(maintainerTeam: string): string {
@@ -100,11 +94,11 @@ export function formatSlackMessage(
 
 export const slackReport = {
     async run(featureFlags: FeatureFlag[]) {
-        const slackWebhook: string = core.getInput('slack-webhook')
+        const webhookUrl: string = core.getInput('webhook-url')
 
-        if (!slackWebhook) {
+        if (!webhookUrl) {
             core.error(
-                'slack-webhook input is not provided, skipping Slack report'
+                'webhook-url input is not provided, skipping Slack report'
             )
             return
         }
@@ -118,6 +112,6 @@ export const slackReport = {
             `Sending message to Slack webhook: ${JSON.stringify(message)}`
         )
 
-        await axios.post(slackWebhook, message)
+        await axios.post(webhookUrl, message)
     }
 }

@@ -8,7 +8,6 @@ export async function run(): Promise<void> {
         const accessToken: string = core.getInput('access-token')
         const projectKey: string = core.getInput('project-key')
         const environment: string = core.getInput('environment-key')
-        const reportType: string = core.getInput('report-type')
         const maintainerTeams: string[] = core
             .getInput('maintainer-teams')
             ?.split(',')
@@ -46,7 +45,7 @@ export async function run(): Promise<void> {
             `Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`
         )
 
-        const reporter = getReportByType(reportType)
+        const reporter = getReportByType()
 
         if (reporter) {
             await reporter.run(filteredFeatureFlags)
