@@ -1,14 +1,11 @@
 import axios from 'axios'
 import * as core from '@actions/core'
 import { FeatureFlag, MaintainerTeam } from '../types'
+import { toFeatureFlagDto, FeatureFlagDto } from '../dto'
 
 type Payload = {
     maintainerTeam: MaintainerTeam
-    featureFlags: {
-        key: string
-        creationDate: string
-        link: string
-    }[]
+    featureFlags: FeatureFlagDto[]
 }
 
 type GroupedData = {
@@ -39,26 +36,21 @@ const groupByMaintainerTeam = (featureFlags: FeatureFlag[]): GroupedData[] => {
 }
 
 const buildPayload = (groupedData: GroupedData[]): Payload[] => {
-    const projectKey: string = core.getInput('project-key')
-    const environment: string = core.getInput('environment-key')
-
     return groupedData.map(({ maintainerTeam, flags }) => ({
         maintainerTeam,
-        featureFlags: flags.map(flag => ({
-            key: flag.key,
-            creationDate: flag.creationDate ?? '',
-            link: `https://app.launchdarkly.com/${projectKey}/${environment}/features/${flag.key}`
-        }))
+        featureFlags: flags.map(flag => toFeatureFlagDto(flag))
     }))
 }
 
 export const apiReport = {
     async run(featureFlags: FeatureFlag[]) {
-        const apiUrl = core.getInput('api-url')
-        const apiToken = core.getInput('api-token')
+        const webhookUrl = core.getInput('webhook-url')
+        const webhookToken = core.getInput('webhook-token')
 
-        if (!apiUrl) {
-            core.warning('api-url input is not provided, skipping API report')
+        if (!webhookUrl) {
+            core.warning(
+                'webhook-url input is not provided, skipping API report'
+            )
             return
         }
 
@@ -70,10 +62,10 @@ export const apiReport = {
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...(apiToken && { Authorization: `Bearer ${apiToken}` })
+            ...(webhookToken && { Authorization: `Bearer ${webhookToken}` })
         }
 
-        await axios.post(apiUrl, response, { headers })
+        await axios.post(webhookUrl, response, { headers })
 
         core.info('Successfully sent data to API')
     }

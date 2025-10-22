@@ -1,9 +1,9 @@
 export type Variation = {
     isFallthrough: boolean // Default Value of the flag
-    targets: number
-    rules: number
-    contextTargets: number
-    nullRules: number
+    targets?: number
+    rules?: number
+    contextTargets?: number
+    nullRules?: number
 }
 
 export type Environment = {
@@ -37,7 +37,7 @@ export type FeatureFlag = {
     tags: string[]
     temporary: boolean
     environments: Record<string, Environment>
-    codeReferences: {
+    codeReferences?: {
         items: { sourceLink: string }[]
     }
 }
