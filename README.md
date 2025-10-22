@@ -22,7 +22,8 @@ To use this action, you need to specify the following parameters:
 - `maintainer-teams`: The teams responsible for maintaining the feature flags.
 - `threshold`: The threshold in days for considering a feature flag as ready
    for removal.
-- `report-type`: The type of report to generate (e.g., 'slack', 'api', or 'default').
+- `report-type`: The type of report to generate (e.g., 'slack', 'API', or
+  'default').
 - `excluded-tags`: Any tags to be excluded from consideration for removal.
 - `enabled-rules`: Comma-separated list of rules to enable. Available rules:
   - **Filter Rules** (must pass ALL enabled filter rules):
@@ -34,9 +35,12 @@ To use this action, you need to specify the following parameters:
     - `no-code-references`: Flags feature flags with no code references
     - `default-variation-only`: Flags feature flags with only default variation
   - Default: All rules enabled
-- `slack-webhook`: The Slack webhook for sending the report (required when report-type is 'slack').
-- `api-url`: The API endpoint URL for sending the report (required when report-type is 'api').
-- `api-token`: The API authentication token (optional, used when report-type is 'api').
+- `slack-webhook`: The Slack webhook for sending the report (required when
+  report-type is 'slack').
+- `api-url`: The API endpoint URL for sending the report (required when
+  report-type is 'API').
+- `api-token`: The API authentication token (optional, used when report-type
+  is 'API').
 
 ### Trigger
 
@@ -161,7 +165,8 @@ jobs:
 
 ## API Report Format
 
-When using the `api` report type, the action will send a POST request to the specified API endpoint with the following payload format:
+When using the `api` report type, the action will send a POST request to the
+specified API endpoint with the following payload format:
 
 ```json
 [
@@ -182,11 +187,13 @@ When using the `api` report type, the action will send a POST request to the spe
 ]
 ```
 
-If an `api-token` is provided, it will be sent as a Bearer token in the Authorization header.
+If an `api-token` is provided, it will be sent as a Bearer token in the
+Authorization header.
 
 ## Notes
 
-- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV, SLACK_WEBHOOK, API_URL, API_TOKEN)
-  are properly configured in your repository's secrets settings.
+- Ensure that all secrets (e.g., ACCESS_TOKEN, PROJECT_KEY, LD_ENV,
+  SLACK_WEBHOOK, API_URL, API_TOKEN) are properly configured in your
+  repository's secrets settings.
 - This action helps streamline the process of identifying and managing outdated
   feature flags in your LaunchDarkly environment.
