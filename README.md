@@ -40,9 +40,9 @@ The `rules-config` parameter accepts YAML format with the following rules:
 **Filter Rules** (must pass ALL enabled filter rules):
 
 - `min-age`: Filters out flags created within the specified number of days
-    - `days`: Number of days (default: 30)
+  - `days`: Number of days (default: 30)
 - `exclude-tags`: Filters out flags with specified tags
-    - `tags`: Array of tag strings to exclude
+  - `tags`: Array of tag strings to exclude
 - `temporary-only`: Filters out permanent flags (only includes temporary flags)
 - `boolean-only`: Filters out multivariate flags (only includes boolean flags)
 
