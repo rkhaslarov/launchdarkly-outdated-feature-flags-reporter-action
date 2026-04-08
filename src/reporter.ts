@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import { getFeatureFlags, getFeatureFlagsByMaintainerTeams } from './service'
 import { runRulesEngine } from './rules'
 import { getReportByType } from './reports'
+import { toFeatureFlagDto } from './dto'
 
 export async function run(): Promise<void> {
     try {
@@ -51,7 +52,10 @@ export async function run(): Promise<void> {
             await reporter.run(filteredFeatureFlags)
         }
 
-        core.setOutput('feature-flags', filteredFeatureFlags)
+        core.setOutput(
+            'feature-flags',
+            filteredFeatureFlags.map(toFeatureFlagDto)
+        )
     } catch (error: unknown) {
         if (error instanceof Error) {
             core.setFailed(error.message)
