@@ -36,14 +36,23 @@ export async function run(): Promise<void> {
             return
         }
 
-        const filteredFeatureFlags = runRulesEngine(featureFlags)
+        const limit = parseInt(core.getInput('limit'))
+        const allFilteredFlags = runRulesEngine(featureFlags)
 
-        if (filteredFeatureFlags.length === 0) {
+        if (allFilteredFlags.length === 0) {
             return
         }
 
         core.info(
-            `Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`
+            `Feature Flags ready for review: ${allFilteredFlags.map(flag => flag.key)}`
+        )
+
+        const filteredFeatureFlags = limit
+            ? allFilteredFlags.slice(0, limit)
+            : allFilteredFlags
+
+        core.info(
+            `Feature Flags ready for review sent to reporter: ${filteredFeatureFlags.map(flag => flag.key)}`
         )
 
         const reporter = getReportByType()
@@ -52,10 +61,11 @@ export async function run(): Promise<void> {
             await reporter.run(filteredFeatureFlags)
         }
 
-        core.setOutput(
-            'feature-flags',
-            filteredFeatureFlags.map(toFeatureFlagDto)
-        )
+        const output = filteredFeatureFlags.map(toFeatureFlagDto)
+
+        core.info(`Default reporter output: ${JSON.stringify(output)}}`)
+
+        core.setOutput('feature-flags', output)
     } catch (error: unknown) {
         if (error instanceof Error) {
             core.setFailed(error.message)

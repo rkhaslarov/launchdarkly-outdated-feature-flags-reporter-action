@@ -59,6 +59,11 @@ inputs:
             'Authentication token for webhook (optional). Sent as Bearer token
             in Authorization header for api report type.'
         required: false
+    limit:
+        description:
+            'Maximum number of feature flags to include in the report. If not
+            set, all matching flags are returned.'
+        required: false
 
 # Define your outputs here.
 outputs:
