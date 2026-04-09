@@ -55566,16 +55566,23 @@ async function run() {
             core.info(`Feature Flags list is empty`);
             return;
         }
-        const filteredFeatureFlags = (0, rules_1.runRulesEngine)(featureFlags);
-        if (filteredFeatureFlags.length === 0) {
+        const limit = parseInt(core.getInput('limit'));
+        const allFilteredFlags = (0, rules_1.runRulesEngine)(featureFlags);
+        if (allFilteredFlags.length === 0) {
             return;
         }
-        core.info(`Feature Flags ready for review: ${filteredFeatureFlags.map(flag => flag.key)}`);
+        core.info(`Feature Flags ready for review: ${allFilteredFlags.map(flag => flag.key)}`);
+        const filteredFeatureFlags = limit
+            ? allFilteredFlags.slice(0, limit)
+            : allFilteredFlags;
+        core.info(`Feature Flags ready for review sent to reporter: ${filteredFeatureFlags.map(flag => flag.key)}`);
         const reporter = (0, reports_1.getReportByType)();
         if (reporter) {
             await reporter.run(filteredFeatureFlags);
         }
-        core.setOutput('feature-flags', filteredFeatureFlags.map(dto_1.toFeatureFlagDto));
+        const output = filteredFeatureFlags.map(dto_1.toFeatureFlagDto);
+        core.info(`Default reporter output: ${JSON.stringify(output)}}`);
+        core.setOutput('feature-flags', output);
     }
     catch (error) {
         if (error instanceof Error) {
