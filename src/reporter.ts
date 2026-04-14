@@ -1,5 +1,9 @@
 import * as core from '@actions/core'
-import { getFeatureFlags, getFeatureFlagsByMaintainerTeams } from './service'
+import {
+    buildFilters,
+    getFeatureFlags,
+    getFeatureFlagsByMaintainerTeams
+} from './service'
 import { runRulesEngine } from './rules'
 import { getReportByType } from './reports'
 import { toFeatureFlagDto } from './dto'
@@ -12,6 +16,7 @@ export async function run(): Promise<void> {
         const maintainerTeams: string[] = core
             .getInput('maintainer-teams')
             ?.split(',')
+        const query: string = core.getInput('query')
 
         core.info(`Starting request...`)
 
@@ -25,10 +30,12 @@ export async function run(): Promise<void> {
             maintainerTeams.length > 0
                 ? await getFeatureFlagsByMaintainerTeams({
                       maintainerTeams,
+                      query,
                       ...requestParams
                   })
                 : await getFeatureFlags({
-                      ...requestParams
+                      ...requestParams,
+                      filters: buildFilters([query ? `query:${query}` : ''])
                   })
 
         if (featureFlags.length === 0) {

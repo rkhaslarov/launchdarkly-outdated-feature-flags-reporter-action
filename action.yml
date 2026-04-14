@@ -45,6 +45,11 @@ inputs:
         description:
             'Maintainer teams with assigned feature flags in Launch Darkly'
         required: false
+    query:
+        description:
+            'Search term to filter feature flags by name or key
+            (case-insensitive). Maps to the LaunchDarkly API query filter.'
+        required: false
     report-type:
         description: 'Report type: slack, api, or default'
         required: false

@@ -27,6 +27,8 @@ custom API endpoint.
 
 - `maintainer-teams`: Comma-separated list of teams responsible for maintaining
   feature flags
+- `query`: Search term to filter feature flags by name or key
+  (case-insensitive). Maps to the LaunchDarkly API `query` filter.
 - `report-type`: Report type - `slack`, `api`, or `default` (default: `default`)
 - `webhook-url`: Webhook URL for sending reports (required for `slack` and `api`
   report types)

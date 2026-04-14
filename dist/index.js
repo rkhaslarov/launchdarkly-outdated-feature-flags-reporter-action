@@ -55548,6 +55548,7 @@ async function run() {
         const maintainerTeams = core
             .getInput('maintainer-teams')
             ?.split(',');
+        const query = core.getInput('query');
         core.info(`Starting request...`);
         const requestParams = {
             accessToken,
@@ -55557,10 +55558,12 @@ async function run() {
         const featureFlags = maintainerTeams.length > 0
             ? await (0, service_1.getFeatureFlagsByMaintainerTeams)({
                 maintainerTeams,
+                query,
                 ...requestParams
             })
             : await (0, service_1.getFeatureFlags)({
-                ...requestParams
+                ...requestParams,
+                filters: (0, service_1.buildFilters)([query ? `query:${query}` : ''])
             });
         if (featureFlags.length === 0) {
             core.info(`Feature Flags list is empty`);
@@ -56079,10 +56082,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getFeatureFlagsByMaintainerTeams = exports.getFeatureFlags = void 0;
+exports.getFeatureFlagsByMaintainerTeams = exports.getFeatureFlags = exports.buildFilters = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(87269));
 const BASE_URL = 'https://app.launchdarkly.com';
 const API_URL = `${BASE_URL}/api/v2/flags`;
+const buildFilters = (parts) => parts.filter(Boolean).join(',');
+exports.buildFilters = buildFilters;
 const makeRequest = async (url, accessToken, params) => {
     const { data } = await axios_1.default.get(url, {
         headers: {
@@ -56120,12 +56125,16 @@ const getFeatureFlags = async ({ accessToken, projectKey, environment, filters =
     return await makePaginatedRequest(`${API_URL}/${projectKey}`, accessToken, params);
 };
 exports.getFeatureFlags = getFeatureFlags;
-const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams }) => {
+const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams, query }) => {
+    const queryFilter = query ? `query:${query}` : '';
     const response = await Promise.all(maintainerTeams.map(async (team) => await (0, exports.getFeatureFlags)({
         accessToken,
         projectKey,
         environment,
-        filters: `maintainerTeamKey:${team}`
+        filters: (0, exports.buildFilters)([
+            `maintainerTeamKey:${team}`,
+            queryFilter
+        ])
     })));
     return response.flat();
 };
