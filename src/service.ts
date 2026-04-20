@@ -5,7 +5,12 @@ const BASE_URL = 'https://app.launchdarkly.com'
 const API_URL = `${BASE_URL}/api/v2/flags`
 
 export const buildFilters = (parts: string[]): string =>
-    parts.filter(Boolean).join(',')
+    parts
+        .filter(part => {
+            const [, value] = part.split(':')
+            return Boolean(value?.trim())
+        })
+        .join(',')
 
 const makeRequest = async (
     url: string,

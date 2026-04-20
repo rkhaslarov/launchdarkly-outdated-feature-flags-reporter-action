@@ -55547,7 +55547,9 @@ async function run() {
         const environment = core.getInput('environment-key');
         const maintainerTeams = core
             .getInput('maintainer-teams')
-            ?.split(',');
+            .split(',')
+            .map(team => team.trim())
+            .filter(Boolean);
         const query = core.getInput('query');
         core.info(`Starting request...`);
         const requestParams = {
@@ -56086,7 +56088,12 @@ exports.getFeatureFlagsByMaintainerTeams = exports.getFeatureFlags = exports.bui
 const axios_1 = __importDefault(__nccwpck_require__(87269));
 const BASE_URL = 'https://app.launchdarkly.com';
 const API_URL = `${BASE_URL}/api/v2/flags`;
-const buildFilters = (parts) => parts.filter(Boolean).join(',');
+const buildFilters = (parts) => parts
+    .filter(part => {
+    const [, value] = part.split(':');
+    return Boolean(value?.trim());
+})
+    .join(',');
 exports.buildFilters = buildFilters;
 const makeRequest = async (url, accessToken, params) => {
     const { data } = await axios_1.default.get(url, {

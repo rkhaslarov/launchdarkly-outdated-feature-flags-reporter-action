@@ -15,7 +15,9 @@ export async function run(): Promise<void> {
         const environment: string = core.getInput('environment-key')
         const maintainerTeams: string[] = core
             .getInput('maintainer-teams')
-            ?.split(',')
+            .split(',')
+            .map(team => team.trim())
+            .filter(Boolean)
         const query: string = core.getInput('query')
 
         core.info(`Starting request...`)
