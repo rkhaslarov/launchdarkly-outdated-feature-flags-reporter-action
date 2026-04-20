@@ -18,7 +18,7 @@ export async function run(): Promise<void> {
             .split(',')
             .map(team => team.trim())
             .filter(Boolean)
-        const query: string = core.getInput('query')
+        const sdkAvailability: string = core.getInput('sdk') ?? ''
 
         core.info(`Starting request...`)
 
@@ -32,12 +32,14 @@ export async function run(): Promise<void> {
             maintainerTeams.length > 0
                 ? await getFeatureFlagsByMaintainerTeams({
                       maintainerTeams,
-                      query,
+                      sdkAvailability,
                       ...requestParams
                   })
                 : await getFeatureFlags({
                       ...requestParams,
-                      filters: buildFilters([query ? `query:${query}` : ''])
+                      filters: buildFilters([
+                          `sdkAvailability:${sdkAvailability}`
+                      ])
                   })
 
         if (featureFlags.length === 0) {
