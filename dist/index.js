@@ -55550,7 +55550,7 @@ async function run() {
             .split(',')
             .map(team => team.trim())
             .filter(Boolean);
-        const query = core.getInput('query');
+        const sdkAvailability = core.getInput('sdk') ?? '';
         core.info(`Starting request...`);
         const requestParams = {
             accessToken,
@@ -55560,12 +55560,14 @@ async function run() {
         const featureFlags = maintainerTeams.length > 0
             ? await (0, service_1.getFeatureFlagsByMaintainerTeams)({
                 maintainerTeams,
-                query,
+                sdkAvailability,
                 ...requestParams
             })
             : await (0, service_1.getFeatureFlags)({
                 ...requestParams,
-                filters: (0, service_1.buildFilters)([query ? `query:${query}` : ''])
+                filters: (0, service_1.buildFilters)([
+                    `sdkAvailability:${sdkAvailability}`
+                ])
             });
         if (featureFlags.length === 0) {
             core.info(`Feature Flags list is empty`);
@@ -56132,15 +56134,14 @@ const getFeatureFlags = async ({ accessToken, projectKey, environment, filters =
     return await makePaginatedRequest(`${API_URL}/${projectKey}`, accessToken, params);
 };
 exports.getFeatureFlags = getFeatureFlags;
-const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams, query }) => {
-    const queryFilter = query ? `query:${query}` : '';
+const getFeatureFlagsByMaintainerTeams = async ({ accessToken, projectKey, environment, maintainerTeams, sdkAvailability }) => {
     const response = await Promise.all(maintainerTeams.map(async (team) => await (0, exports.getFeatureFlags)({
         accessToken,
         projectKey,
         environment,
         filters: (0, exports.buildFilters)([
             `maintainerTeamKey:${team}`,
-            queryFilter
+            `sdkAvailability:${sdkAvailability}`
         ])
     })));
     return response.flat();

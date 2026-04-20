@@ -87,16 +87,14 @@ export const getFeatureFlagsByMaintainerTeams = async ({
     projectKey,
     environment,
     maintainerTeams,
-    query
+    sdkAvailability
 }: {
     accessToken: string
     projectKey: string
     environment: string
     maintainerTeams: string[]
-    query?: string
+    sdkAvailability?: string
 }): Promise<FeatureFlag[]> => {
-    const queryFilter = query ? `query:${query}` : ''
-
     const response = await Promise.all(
         maintainerTeams.map(
             async team =>
@@ -106,7 +104,7 @@ export const getFeatureFlagsByMaintainerTeams = async ({
                     environment,
                     filters: buildFilters([
                         `maintainerTeamKey:${team}`,
-                        queryFilter
+                        `sdkAvailability:${sdkAvailability}`
                     ])
                 })
         )
